@@ -1,3 +1,4 @@
+//see LICENSE for license
 package rocketchip
 
 import Chisel._

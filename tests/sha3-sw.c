@@ -1,7 +1,8 @@
+//see LICENSE for license
 // The following is a RISC-V program to test the functionality of the
-// sumaccel RoCC accelerator.
-// Compile with riscv-gcc sumaccel-test.c
-// Run with spike --extension=sumaccel pk a.out
+// sha3 RoCC accelerator.
+// Compile with riscv-gcc sha3-rocc.c
+// Run with spike --extension=sha3 pk a.out
 
 #include <assert.h>
 #include <stdio.h>

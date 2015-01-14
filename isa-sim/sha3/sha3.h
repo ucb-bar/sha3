@@ -1,3 +1,4 @@
+//see LICENSE for license
 #ifndef _RISCV_SHA3_ROCC_H
 #define _RISCV_SHA3_ROCC_H
 

@@ -1,3 +1,4 @@
+//see LICENSE for license
 #include "extension.h"
 #include "sha3.h"
 #include "dummy-rocc.h"

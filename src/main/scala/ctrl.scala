@@ -1,3 +1,4 @@
+//see LICENSE for license
 package sha3
 
 import Chisel._

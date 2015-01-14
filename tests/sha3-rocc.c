@@ -1,3 +1,4 @@
+//see LICENSE for license
 // The following is a RISC-V program to test the functionality of the
 // sha3 RoCC accelerator.
 // Compile with riscv-gcc sha3-rocc.c
