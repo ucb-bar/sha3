@@ -2,5 +2,5 @@
 #see LICENSE for license
 
 cd ../riscv-tools/riscv-isa-sim && ln -s ../../rocc-template/isa-sim/sha3 sha3
-ln -s ../../rocc-template/isa-sim/configure.ac
-#cd riscv && rm extension.cc && ln -s ../../../rocc-template/isa-sim/riscv/extension.cc extension.cc
+rm configure.ac && ln -s ../../rocc-template/isa-sim/configure.ac
+cd ../../src/main/scala && ln -s ../../../rocc-template/config/PrivateConfigs.scala PrivateConfigs.scala
