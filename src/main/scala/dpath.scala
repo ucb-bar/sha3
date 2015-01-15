@@ -1,4 +1,5 @@
 //see LICENSE for license
+//authors: Colin Schmidt, Adam Izraelevitz
 package sha3
 
 import Chisel._
