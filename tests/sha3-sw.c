@@ -35,4 +35,5 @@ int main() {
   } while(0);
 
   printf("success!\n");
+  return 0;
 }

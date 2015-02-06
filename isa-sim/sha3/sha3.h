@@ -33,7 +33,9 @@ public:
 
   void reset()
   {
-    for(int i = 0; i < depth; i++) state[i] = 0;
+    msg_addr = 0;
+    hash_addr = 0;
+    msg_len = 0;
   }
 
   reg_t custom0(rocc_insn_t insn, reg_t xs1, reg_t xs2)
@@ -73,9 +75,6 @@ public:
   }
 
 private:
-  static const int depth = 25;
-  //only support state word size == xprlen
-  reg_t state[depth];
   reg_t msg_addr;
   reg_t hash_addr;
   reg_t msg_len;

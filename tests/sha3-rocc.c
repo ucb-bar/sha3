@@ -43,4 +43,5 @@ int main() {
 
   
   printf("success!\n");
+  return 0;
 }
