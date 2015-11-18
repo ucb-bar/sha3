@@ -2,12 +2,20 @@
 //authors: Colin Schmidt, Adam Izraelevitz
 package sha3
 
-import Chisel.Implicits._
+//import Chisel.Implicits._
 import Chisel._
 
 import rocket._
 
-abstract class SimpleRoCC extends RoCC
+import cde.{Parameters, Field, Ex, World, ViewSym, Knob, Dump, Config}
+import cde.Implicits._
+
+case object WidthP extends Field[Int]
+case object Stages extends Field[Int]
+case object FastMem extends Field[Boolean]
+case object BufferSram extends Field[Boolean]
+
+abstract class SimpleRoCC()(implicit p: Parameters) extends RoCC()(p)
 {
   io.interrupt := Bool(false)
     // Set this true to trigger an interrupt on the processor (please refer to supervisor documentation)
@@ -15,15 +23,18 @@ abstract class SimpleRoCC extends RoCC
   //a simple accelerator doesn't use imem or page tables
   io.imem.acquire.valid := Bool(false)
   io.imem.grant.ready := Bool(true)
+  io.dmem.head.acquire.valid := Bool(false)
+  io.dmem.head.grant.ready := Bool(false)
   io.iptw.req.valid := Bool(false)
   io.dptw.req.valid := Bool(false)
   io.pptw.req.valid := Bool(false)
+  io.mem.invalidate_lr := Bool(false)
 }
 
-class Sha3Accel() extends SimpleRoCC {
+class Sha3Accel()(implicit p: Parameters) extends SimpleRoCC()(p) {
   //parameters
-  val W = params[Int]("width")
-  val S = params[Int]("stages")
+  val W = p(WidthP)
+  val S = p(Stages)
   //constants
   val r = 2*256
   val c = 25*W - r
@@ -39,7 +50,7 @@ class Sha3Accel() extends SimpleRoCC {
   //mem
   //busy
 
-  val ctrl = Module(new CtrlModule(W,S))
+  val ctrl = Module(new CtrlModule(W,S)(p))
   
   ctrl.io.rocc_req_val   <> io.cmd.valid
   ctrl.io.rocc_req_rdy   <> io.cmd.ready
@@ -65,25 +76,31 @@ class Sha3Accel() extends SimpleRoCC {
   dpath.io.message_in <> ctrl.io.buffer_out
   io.mem.req.bits.data := dpath.io.hash_out(ctrl.io.windex)
 
-  ctrl.io <> dpath.io
+  //ctrl.io <> dpath.io
+  ctrl.io.absorb <> dpath.io.absorb
+  ctrl.io.init <> dpath.io.init
+  ctrl.io.write <> dpath.io.write
+  ctrl.io.round <> dpath.io.round
+  ctrl.io.stage <> dpath.io.stage
+  ctrl.io.aindex <> dpath.io.aindex
 
 }
 
-class DefaultConfig() extends ChiselConfig {
+class DefaultConfig() extends Config {
   override val topDefinitions:World.TopDefs = {
     (pname,site,here) => pname match {
-      case "width" => 64
-      case "stages" => Knob("stages")
-      case "fast_mem" => Knob("fast_mem")
-      case "buffer_sram" => Dump(Knob("buffer_sram"))
+      case WidthP => 64
+      case Stages => Knob("stages")
+      case FastMem => Knob("fast_mem")
+      case BufferSram => Dump(Knob("buffer_sram"))
       //case "multi_vt" => Dump(Knob("multi_vt"))
     }
   }
   override val topConstraints:List[ViewSym=>Ex[Boolean]] = List(
-    ex => ex[Int]("width") === 64,
-    ex => ex[Int]("stages") >= 1 && ex[Int]("stages") <= 4 && (ex[Int]("stages")%2 === 0 || ex[Int]("stages") === 1),
-    ex => ex[Boolean]("fast_mem") === ex[Boolean]("fast_mem"),
-    ex => ex[Boolean]("buffer_sram") === ex[Boolean]("buffer_sram")
+    ex => ex(WidthP) === 64,
+    ex => ex(Stages) >= 1 && ex(Stages) <= 4 && (ex(Stages)%2 === 0 || ex(Stages) === 1),
+    ex => ex(FastMem) === ex(FastMem),
+    ex => ex(BufferSram) === ex(BufferSram)
     //ex => ex[Boolean]("multi_vt") === ex[Boolean]("multi_vt")
   )
   override val knobValues:Any=>Any = {

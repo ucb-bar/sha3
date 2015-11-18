@@ -6,10 +6,12 @@ import Chisel._
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
+import cde.{Parameters, Config, Dump, Knob, Ex, ViewSym}
+import cde.Implicits._
 
 import uncore.constants.MemoryOpConstants._
 
-class CtrlModule(val W: Int, val S: Int) extends Module {//with MemoryOpConstants{
+class CtrlModule(val W: Int, val S: Int)(implicit p: Parameters) extends Module() {//with MemoryOpConstants{
   val r = 2*256
   val c = 25*W - r
   val round_size_words = c/W
@@ -71,11 +73,11 @@ class CtrlModule(val W: Int, val S: Int) extends Module {//with MemoryOpConstant
 
   val dmem_resp_tag_reg = Reg(next=io.dmem_resp_tag)
   //memory pipe state
-  val fast_mem = params[Boolean]("fast_mem")
+  val fast_mem = p(FastMem)
   val m_idle :: m_read :: m_wait :: m_pad :: m_absorb :: Nil = Enum(UInt(), 5)
   val mem_s = Reg(init=m_idle)
 
-  val buffer_sram = params[Boolean]("buffer_sram")
+  val buffer_sram = p(BufferSram)
   //SRAM Buffer
   val buffer_mem = Mem(UInt(width = W), round_size_words, seqRead = true)
   //Flip-Flop buffer

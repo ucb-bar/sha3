@@ -4,27 +4,33 @@ package rocketchip
 import Chisel._
 import uncore._
 import rocket._
+//import cde._
+import cde.{Parameters, Field, Config, Knob, Dump, World, Ex, ViewSym}
+import cde.Implicits._
 import sha3._
 
-import Implicits._
+//case object Width extends Field[Int]
+//case object Stages extends Field[Int]
+//case object FastMem extends Field[Boolean]
+//case object BufferSram extends Field[Boolean]
 
-class Sha3Config extends ChiselConfig {
+class Sha3Config extends Config {
   override val topDefinitions:World.TopDefs = {
     (pname,site,here) => pname match {
-      case "width" => 64
-      case "stages" => Knob("stages")
-      case "fast_mem" => Knob("fast_mem")
-      case "buffer_sram" => Dump(Knob("buffer_sram"))
-      case RoCCMaxTaggedMemXacts => 32
-      case BuildRoCC => Some(() => (Module(new Sha3Accel, { case CoreName => "Sha3" })))
+      case WidthP => 64
+      case Stages => Knob("stages")
+      case FastMem => Knob("fast_mem")
+      case BufferSram => Dump(Knob("buffer_sram"))
+      case RoccMaxTaggedMemXacts => 32
+      case BuildRoCC => Some((p: Parameters) => (Module(new Sha3Accel()(p), { case CoreName => "rocket" })))
     }
   }
  
   override val topConstraints:List[ViewSym=>Ex[Boolean]] = List(
-    ex => ex[Int]("width") === 64,
-    ex => ex[Int]("stages") >= 1 && ex[Int]("stages") <= 4 && (ex[Int]("stages")%2 === 0 || ex[Int]("stages") === 1),
-    ex => ex[Boolean]("fast_mem") === ex[Boolean]("fast_mem"),
-    ex => ex[Boolean]("buffer_sram") === ex[Boolean]("buffer_sram")
+    ex => ex(WidthP) === 64,
+    ex => ex(Stages) >= 1 && ex(Stages) <= 4 && (ex(Stages)%2 === 0 || ex(Stages) === 1),
+    ex => ex(FastMem) === ex(FastMem),
+    ex => ex(BufferSram) === ex(BufferSram)
     //ex => ex[Boolean]("multi_vt") === ex[Boolean]("multi_vt")
   )
   override val knobValues:Any=>Any = {
@@ -35,6 +41,6 @@ class Sha3Config extends ChiselConfig {
   }
 }
 
-class Sha3VLSIConfig extends ChiselConfig(new Sha3Config ++ new DefaultVLSIConfig)
-class Sha3FPGAConfig extends ChiselConfig(new Sha3Config ++ new DefaultFPGAConfig) 
-class Sha3CPPConfig extends ChiselConfig(new Sha3Config ++ new DefaultCPPConfig) 
+class Sha3VLSIConfig extends Config(new Sha3Config ++ new DefaultVLSIConfig)
+class Sha3FPGAConfig extends Config(new Sha3Config ++ new DefaultFPGAConfig) 
+class Sha3CPPConfig extends Config(new Sha3Config ++ new DefaultCPPConfig) 
