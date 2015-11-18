@@ -10,6 +10,7 @@ You can then test it using the emulator
     cd ../emulator && make CONFIG=Sha3CPPConfig run-asm-tests
 
 You can emulate the software implementation of sha3 by running
+
     ./emulator-Top-Sha3CPPConfig pk ../sha3/tests/sha3-sw.rv +dramsim
 
 or
