@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 #see LICENSE for license
 
-cd ../riscv-tools/riscv-isa-sim && ln -s ../../rocc-template/isa-sim/sha3 sha3
-rm configure.ac && ln -s ../../rocc-template/isa-sim/configure.ac
-cd ../../src/main/scala && ln -s ../../../rocc-template/config/PrivateConfigs.scala PrivateConfigs.scala
+cd ../ && ln -s rocc-template sha3
+mv Makefrag Makefrag.old && ln -s sha3/config/Makefrag Makefrag
+cd riscv-tools/riscv-isa-sim && ln -s ../../sha3/isa-sim/sha3 sha3
+mv configure.ac configure.ac.old && ln -s ../../sha3/isa-sim/configure.ac && ln -s ../../sha3/isa-sim/riscv-sha3.pc.in riscv-sha3.pc.in
+cd ../../src/main/scala && ln -s ../../../sha3/config/PrivateConfigs.scala PrivateConfigs.scala

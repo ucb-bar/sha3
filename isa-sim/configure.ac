@@ -36,8 +36,8 @@ m4_define( proj_version, [?])
 # Setup
 #-------------------------------------------------------------------------
 
-AC_LANG_CPLUSPLUS
 AC_INIT(proj_name,proj_version,proj_maintainer,proj_abbreviation)
+AC_LANG_CPLUSPLUS
 AC_CONFIG_SRCDIR([riscv/common.h])
 AC_CONFIG_AUX_DIR([scripts])
 AC_CANONICAL_BUILD
@@ -81,7 +81,7 @@ AC_SUBST([CXXFLAGS],["-Wall -Wno-unused -O2 -std=c++11"])
 # The '*' suffix indicates an optional subproject. The '**' suffix
 # indicates an optional subproject which is also the name of a group.
 
-MCPPBS_SUBPROJECTS([ riscv, sha3, dummy_rocc, softfloat, spike_main ])
+MCPPBS_SUBPROJECTS([ riscv, sha3, hwacha, dummy_rocc, softfloat, spike_main ])
 
 #-------------------------------------------------------------------------
 # MCPPBS subproject groups
@@ -100,4 +100,11 @@ MCPPBS_SUBPROJECTS([ riscv, sha3, dummy_rocc, softfloat, spike_main ])
 
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([riscv-spike.pc])
+AC_CONFIG_FILES([riscv-riscv.pc])
+AC_CONFIG_FILES([riscv-hwacha.pc])
+AC_CONFIG_FILES([riscv-softfloat.pc])
+AC_CONFIG_FILES([riscv-dummy_rocc.pc])
+AC_CONFIG_FILES([riscv-sha3.pc])
+AC_CONFIG_FILES([riscv-spike_main.pc])
 AC_OUTPUT
