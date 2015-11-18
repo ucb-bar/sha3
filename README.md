@@ -18,6 +18,7 @@ or
     ./emulator-Top-Sha3CPPConfig pk ../sha3/tests/sha3-sw-bm.rv +dramsim
 
 You can emulate the accelerated sha3 by running
+
     ./emulator-Top-Sha3CPPConfig pk ../sha3/tests/sha3-rocc-bm.rv +dramsim
 
 or 
