@@ -21,14 +21,18 @@ abstract class SimpleRoCC()(implicit p: Parameters) extends RoCC()(p)
     // Set this true to trigger an interrupt on the processor (please refer to supervisor documentation)
 
   //a simple accelerator doesn't use imem or page tables
-  io.imem.acquire.valid := Bool(false)
-  io.imem.grant.ready := Bool(true)
-  io.dmem.head.acquire.valid := Bool(false)
-  io.dmem.head.grant.ready := Bool(false)
+
+  //Old Format
+  //io.imem.acquire.valid := Bool(false)
+  //io.imem.grant.ready := Bool(false)
+  //io.imem.finish.valid := Bool(false)
+
+  //New Format
+  io.autl.acquire.valid := Bool(false)
+  io.autl.grant.ready := Bool(false)
   io.iptw.req.valid := Bool(false)
   io.dptw.req.valid := Bool(false)
   io.pptw.req.valid := Bool(false)
-  io.mem.invalidate_lr := Bool(false)
 }
 
 class Sha3Accel()(implicit p: Parameters) extends SimpleRoCC()(p) {

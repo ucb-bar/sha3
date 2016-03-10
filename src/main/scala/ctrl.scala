@@ -83,8 +83,9 @@ class CtrlModule(val W: Int, val S: Int)(implicit p: Parameters) extends Module(
   //Flip-Flop buffer
   val buffer = Vec.fill(round_size_words){Reg(init = UInt(width = W))}
 
-  val buffer_reg_raddr = Reg(UInt())
-  val buffer_wen = Bool(); buffer_wen := Bool(false)
+  val buffer_raddr = Reg(UInt(width = log2Up(round_size_words)))
+  val buffer_wen = Bool();
+  buffer_wen := Bool(false) //Defaut value
   debug(buffer_wen)
   val buffer_waddr = UInt(width = W); buffer_waddr := UInt(0)
   debug(buffer_waddr)
@@ -94,8 +95,12 @@ class CtrlModule(val W: Int, val S: Int)(implicit p: Parameters) extends Module(
   debug(buffer_rdata)
   if(buffer_sram){ 
     when(buffer_wen) { buffer_mem.write(buffer_waddr, buffer_wdata) }
-    buffer_rdata := buffer_mem(buffer_reg_raddr)
+    buffer_rdata := buffer_mem(buffer_raddr)
   }
+
+  //This is used to prevent the pad index from advancing if waiting for the sram to read
+  //SRAM reads take 1 cycle
+  val wait_for_sram = Reg(init = Bool(true))
   
   val buffer_valid = Reg(init = Bool(false))
   val buffer_count = Reg(init = UInt(0,5))
@@ -117,18 +122,21 @@ class CtrlModule(val W: Int, val S: Int)(implicit p: Parameters) extends Module(
                      (pindex >= UInt(round_size_words - 1))
   }
 
+  //Note that the output of io.aindex is delayed by 1 cycle
   io.aindex     := Reg(next = aindex)
   io.absorb     := areg
   areg          := Bool(false)
   if(buffer_sram){
     //when(areg) {
-      buffer_reg_raddr := aindex
+    //Note that the aindex used here is one cycle behind that is passed to the datapath (out of phase)
+      buffer_raddr := aindex
     //}.elsewhen(mem_s === m_pad){
     when(mem_s === m_pad) {
-      buffer_reg_raddr := pindex
+      buffer_raddr := pindex
     }
     io.buffer_out := buffer_rdata
   }else{
+    //Note that this uses the index that is passed to the datapath (in phase)
     io.buffer_out := buffer(io.aindex)
   }
   io.windex     := windex
@@ -150,7 +158,7 @@ class CtrlModule(val W: Int, val S: Int)(implicit p: Parameters) extends Module(
   debug(byte_offset)
 
   //hasher state
-  val s_idle :: s_absorb :: s_hash :: s_write :: Nil = Enum(UInt(), 4)
+  val s_idle :: s_absorb :: s_finish_abs :: s_hash :: s_write :: Nil = Enum(UInt(), 5)
 
   val state = Reg(init=s_idle)
 
@@ -182,6 +190,7 @@ class CtrlModule(val W: Int, val S: Int)(implicit p: Parameters) extends Module(
         io.rocc_req_rdy := Bool(true)
         msg_addr  := io.rocc_rs1
         hash_addr := io.rocc_rs2
+        println("Msg Addr: "+msg_addr+", Hash Addr: "+hash_addr)
         io.busy := Bool(true)
       }.elsewhen(io.rocc_funct === UInt(1)) {
         busy := Bool(true)
@@ -381,9 +390,11 @@ class CtrlModule(val W: Int, val S: Int)(implicit p: Parameters) extends Module(
           when(byte_offset === UInt(bytes_per_word -1)){
             //together with the first pad
             if(buffer_sram){
-              buffer_wen := Bool(true)
-              buffer_waddr := pindex
-              buffer_wdata := Cat(both_pad, buffer_rdata(55,0))
+              when(wait_for_sram === Bool(false)){
+                buffer_wen := Bool(true)
+                buffer_waddr := pindex
+                buffer_wdata := Cat(both_pad, buffer_rdata(55,0))
+              }
             }else{
               buffer(pindex) := Cat(both_pad, buffer(pindex)(55,0))
             }
@@ -403,9 +414,11 @@ class CtrlModule(val W: Int, val S: Int)(implicit p: Parameters) extends Module(
             }
           }.otherwise{
             if(buffer_sram){
-              buffer_wen := Bool(true)
-              buffer_waddr := pindex
-              buffer_wdata := Cat(last_pad, buffer_rdata((bytes_per_word-1)*8-1,0))
+              when(wait_for_sram === Bool(false)){
+                buffer_wen := Bool(true)
+                buffer_waddr := pindex
+                buffer_wdata := Cat(last_pad, buffer_rdata((bytes_per_word-1)*8-1,0))
+              }
             }else{
               buffer(pindex) := Cat(last_pad, buffer(pindex)((bytes_per_word-1)*8-1,0))
             }
@@ -417,54 +430,77 @@ class CtrlModule(val W: Int, val S: Int)(implicit p: Parameters) extends Module(
           //not last byte so we put first pad here
           when(byte_offset === UInt(1)){
             if(buffer_sram){
-              buffer_wen := Bool(true)
-              buffer_waddr := pindex
-              buffer_wdata := Cat(first_pad,buffer_rdata(7,0))
+              when(wait_for_sram === Bool(false)){
+                //SRAM was allowed 1 cycle to read
+                buffer_wen := Bool(true)
+                buffer_waddr := pindex
+                buffer_wdata := Cat(first_pad,buffer_rdata(7,0))
+                //the pindex is still the same as last cycle and buffer_rdata contains buffer(pindex)
+              }
             }else{
               buffer(pindex) := Cat(first_pad,buffer(pindex)(7,0))
             }
           }.elsewhen(byte_offset === UInt(2)){
             if(buffer_sram){
-              buffer_wen := Bool(true)
-              buffer_waddr := pindex
-              buffer_wdata := Cat(first_pad,buffer_rdata(15,0))
+              when(wait_for_sram === Bool(false)){
+                buffer_wen := Bool(true)
+                buffer_waddr := pindex
+                buffer_wdata := Cat(first_pad,buffer_rdata(15,0))
+              }
             }else{
               buffer(pindex) := Cat(first_pad,buffer(pindex)(15,0))
             }
           }.elsewhen(byte_offset === UInt(3)){
             if(buffer_sram){
-              buffer_wen := Bool(true)
-              buffer_waddr := pindex
-              buffer_wdata := Cat(first_pad,buffer_rdata(23,0))
+              when(wait_for_sram === Bool(false)){
+                buffer_wen := Bool(true)
+                buffer_waddr := pindex
+                buffer_wdata := Cat(first_pad,buffer_rdata(23,0))
+              }
             }else{
               buffer(pindex) := Cat(first_pad,buffer(pindex)(23,0))
             }
           }.elsewhen(byte_offset === UInt(4)){
             if(buffer_sram){
-              buffer_wen := Bool(true)
-              buffer_waddr := pindex
-              buffer_wdata := Cat(first_pad,buffer_rdata(31,0))
+              when(wait_for_sram === Bool(false)){
+                buffer_wen := Bool(true)
+                buffer_waddr := pindex
+                buffer_wdata := Cat(first_pad,buffer_rdata(31,0))
+              }
             }else{
               buffer(pindex) := Cat(first_pad,buffer(pindex)(31,0))
             }
           }.elsewhen(byte_offset === UInt(5)){
             if(buffer_sram){
-              buffer_wen := Bool(true)
-              buffer_waddr := pindex
-              buffer_wdata := Cat(first_pad,buffer_rdata(39,0))
+              when(wait_for_sram === Bool(false)){
+                buffer_wen := Bool(true)
+                buffer_waddr := pindex
+                buffer_wdata := Cat(first_pad,buffer_rdata(39,0))
+              }
             }else{
               buffer(pindex) := Cat(first_pad,buffer(pindex)(39,0))
             }
           }.elsewhen(byte_offset === UInt(6)){
             if(buffer_sram){
-              buffer_wen := Bool(true)
-              buffer_waddr := pindex
-              buffer_wdata := Cat(first_pad,buffer_rdata(47,0))
+              when(wait_for_sram === Bool(false)){
+                buffer_wen := Bool(true)
+                buffer_waddr := pindex
+                buffer_wdata := Cat(first_pad,buffer_rdata(47,0))
+              }
             }else{
               buffer(pindex) := Cat(first_pad,buffer(pindex)(47,0))
             }
+          }.elsewhen(byte_offset === UInt(7)){
+            if(buffer_sram){
+              when(wait_for_sram === Bool(false)){
+                buffer_wen := Bool(true)
+                buffer_waddr := pindex
+                buffer_wdata := Cat(first_pad,buffer_rdata(55,0))
+              }
+            }else{
+              buffer(pindex) := Cat(first_pad,buffer(pindex)(55,0))
+            }
           }
-          //TODO: why is there no 7 case? And why did we used to have a 0 case?
         }.otherwise{
           //this is only valid if we didn't fill any words
           when(words_filled === UInt(0) && byte_offset === UInt(0)){
@@ -490,16 +526,30 @@ class CtrlModule(val W: Int, val S: Int)(implicit p: Parameters) extends Module(
         mindex := UInt(0)//reset this for absorb
         mem_s := m_idle
         pindex := UInt(0)
+        wait_for_sram := Bool(true)
       }.otherwise{
         mem_s := m_absorb
         pindex := UInt(0)
+        wait_for_sram := Bool(true)
       }
     }.otherwise{
       //don't move pindex if we haven't received a response for this index
       when(buffer_count < mindex && (pindex >= buffer_count) ){
         mem_s := m_pad
       }.otherwise{
-        pindex := pindex + UInt(1)
+        if(buffer_sram){
+          //With SRAM, we need to increment pindex every other cycle
+          when(wait_for_sram === Bool(false)){
+            pindex := pindex + UInt(1)
+            wait_for_sram := Bool(true)
+          }.otherwise{
+            wait_for_sram := Bool(false)
+          }
+        }
+        else{
+          //Register buffer does not need to wait a cycle
+          pindex := pindex + UInt(1)
+        }
         mem_s := m_pad
       }
     }
@@ -559,14 +609,20 @@ class CtrlModule(val W: Int, val S: Int)(implicit p: Parameters) extends Module(
       rindex := UInt(0)
       sindex := UInt(0)
       aindex := UInt(0)
-      areg   := Bool(false)
+      //Delayed 1 cycle for sram
+      //areg   := Bool(false)
       buffer_valid := Bool(false)
       buffer_count := UInt(0)
       hashed := hashed + UInt(8*round_size_words)
-      state := s_hash
+      state := s_finish_abs
     }.otherwise{
       state := s_absorb
     }
+  }
+  is(s_finish_abs){
+    //There is a 1 cycle delay for absorb to finish (since the SRAM read is delayed by 1 cycle)
+    areg  := Bool(false)
+    state := s_hash
   }
   is(s_hash){
     when(rindex < UInt(rounds)){
