@@ -28,7 +28,7 @@ class DpathModule(val W: Int, val S: Int) extends Module {
     val hash_out = Vec.fill(hash_size_words){Bits(OUTPUT, width = W)}
   }
 
-  val state = Vec.fill(5*5){Reg(init = Bits(0, width = W))}
+  val state = Reg(init=Vec.fill(5*5){ Bits(0, width = W)})
 
   //submodules
   val theta = Module(new ThetaModule(W)).io

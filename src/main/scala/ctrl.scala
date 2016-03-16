@@ -79,17 +79,17 @@ class CtrlModule(val W: Int, val S: Int)(implicit p: Parameters) extends Module(
 
   val buffer_sram = p(BufferSram)
   //SRAM Buffer
-  val buffer_mem = Mem(UInt(width = W), round_size_words, seqRead = true)
+  val buffer_mem = Mem(round_size_words, UInt(width = W))
   //Flip-Flop buffer
-  val buffer = Vec.fill(round_size_words){Reg(init = UInt(width = W))}
+  val buffer = Reg(init=Vec.fill(round_size_words) { UInt(width = W) })
 
   val buffer_raddr = Reg(UInt(width = log2Up(round_size_words)))
-  val buffer_wen = Bool();
+  val buffer_wen = Wire(Bool());
   buffer_wen := Bool(false) //Defaut value
   debug(buffer_wen)
-  val buffer_waddr = UInt(width = W); buffer_waddr := UInt(0)
+  val buffer_waddr = Wire(UInt(width = W)); buffer_waddr := UInt(0)
   debug(buffer_waddr)
-  val buffer_wdata = UInt(width = W); buffer_wdata := UInt(0)
+  val buffer_wdata = Wire(UInt(width = W)); buffer_wdata := UInt(0)
   debug(buffer_wdata)
   val buffer_rdata = Bits(width = W);
   debug(buffer_rdata)
@@ -111,7 +111,7 @@ class CtrlModule(val W: Int, val S: Int)(implicit p: Parameters) extends Module(
   val windex  = Reg(init = UInt(0,log2Up(hash_size_words+1)))
   val aindex  = Reg(init = UInt(0,log2Up(round_size_words)))
   val pindex  = Reg(init = UInt(0,log2Up(round_size_words)))
-  val writes_done  = Vec.fill(hash_size_words){Reg(init = Bool(false))}
+  val writes_done  = Reg( init=Vec.fill(hash_size_words) { Bool(false) })
   val next_buff_val = Reg(init = Bool(false))
   if(fast_mem){
     next_buff_val := (buffer_count >= mindex) &&
@@ -226,7 +226,7 @@ class CtrlModule(val W: Int, val S: Int)(implicit p: Parameters) extends Module(
   is(m_read) {
     //dmem signals
     //only read if we aren't writing
-    when(state != s_write){
+    when(state =/= s_write){
       io.dmem_req_val := read < msg_len && mindex < UInt(round_size_words)
       io.dmem_req_addr := msg_addr + (mindex << UInt(3))
       io.dmem_req_tag := mindex
@@ -426,7 +426,7 @@ class CtrlModule(val W: Int, val S: Int)(implicit p: Parameters) extends Module(
         }
       }.elsewhen(pindex === words_filled){
         //normally this is when we need to write the first_pad
-        when(byte_offset != UInt(0)) {
+        when(byte_offset =/= UInt(0)) {
           //not last byte so we put first pad here
           when(byte_offset === UInt(1)){
             if(buffer_sram){

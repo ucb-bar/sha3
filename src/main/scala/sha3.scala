@@ -26,13 +26,14 @@ abstract class SimpleRoCC()(implicit p: Parameters) extends RoCC()(p)
   //io.imem.acquire.valid := Bool(false)
   //io.imem.grant.ready := Bool(false)
   //io.imem.finish.valid := Bool(false)
+  //io.iptw.req.valid := Bool(false)
+  //io.dptw.req.valid := Bool(false)
+  //io.pptw.req.valid := Bool(false)
 
   //New Format
   io.autl.acquire.valid := Bool(false)
   io.autl.grant.ready := Bool(false)
-  io.iptw.req.valid := Bool(false)
-  io.dptw.req.valid := Bool(false)
-  io.pptw.req.valid := Bool(false)
+  for(i <- 0 until p(RoccNPTWPorts)) io.ptw(i).req.valid := Bool(false)
 }
 
 class Sha3Accel()(implicit p: Parameters) extends SimpleRoCC()(p) {

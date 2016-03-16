@@ -22,7 +22,10 @@ class Sha3Config extends Config {
       case FastMem => Knob("fast_mem")
       case BufferSram => Dump(Knob("buffer_sram"))
       case RoccMaxTaggedMemXacts => 32
-      case BuildRoCC => Some((p: Parameters) => (Module(new Sha3Accel()(p), { case CoreName => "rocket" })))
+      case BuildRoCC => Seq( 
+                          RoccParameters(    
+                            opcodes = OpcodeSet.custom0,
+                            generator = (p: Parameters) => (Module(new Sha3Accel()(p.alterPartial({ case CoreName => "Rocket" })))) ))
     }
   }
  

@@ -35,7 +35,7 @@ class RhoPiModule(val W : Int = 64) extends Module {
 
   for(i <- 0 until 5) {
     for(j <- 0 until 5) {
-      val temp = Bits()
+      val temp = Wire(Bits())
       if((RHOPI.tri(i*5+j)%W) == 0){
         temp := io.state_i(i*5+j)
       }else{
