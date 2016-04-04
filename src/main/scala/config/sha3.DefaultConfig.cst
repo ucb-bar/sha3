@@ -1,0 +1,4 @@
+( ( 64 ) = ( 64 ) )
+( ( $fast_mem ) = ( $fast_mem ) )
+( ( $buffer_sram ) = ( $buffer_sram ) )
+( ( ( ( $stages ) >= ( 1 ) ) && ( ( $stages ) <= ( 4 ) ) ) && ( ( ( ( $stages ) % ( 2 ) ) = ( 0 ) ) || ( ( $stages ) = ( 1 ) ) ) )
