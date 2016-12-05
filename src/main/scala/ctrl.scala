@@ -3,11 +3,11 @@
 package sha3
 
 import Chisel._
+import config._
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
-import cde.{Parameters, Config, Dump, Knob, Ex, ViewSym}
-import cde.Implicits._
+import rocket.constants.ScalarOpConstants._
 
 import uncore.constants.MemoryOpConstants._
 
@@ -81,7 +81,8 @@ class CtrlModule(val W: Int, val S: Int)(implicit p: Parameters) extends Module(
   //SRAM Buffer
   val buffer_mem = Mem(round_size_words, UInt(width = W))
   //Flip-Flop buffer
-  val buffer = Reg(init=Vec.fill(round_size_words) { UInt(width = W) })
+  val buffer = Reg(Vec(round_size_words, UInt(width = W)))
+
 
   val buffer_raddr = Reg(UInt(width = log2Up(round_size_words)))
   val buffer_wen = Wire(Bool());

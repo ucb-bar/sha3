@@ -25,11 +25,14 @@ int main() {
 
     // setup accelerator with addresses of input and output
     //              opcode rd rs1          rs2          funct   
-    asm volatile ("custom0 0, %[msg_addr], %[hash_addr], 0" : : [msg_addr]"r"(&input), [hash_addr]"r"(&output));
+    // asm volatile ("custom0 0, %[msg_addr], %[hash_addr], 0" : : [msg_addr]"r"(&input), [hash_addr]"r"(&output));
+    int dummy_result;
+    ROCC_INSTRUCTION(0, dummy_result, &input, &output, 0)
 
     // Set length and compute hash
     //              opcode rd rs1      rs2 funct   
-    asm volatile ("custom0 0, %[length], 0, 1" : : [length]"r"(ilen));
+    // asm volatile ("custom0 0, %[length], 0, 1" : : [length]"r"(ilen));
+    ROCC_INSTRUCTION(0, dummy_result, ilen, 0, 1)
     asm volatile ("fence");
     // Check result
     int i = 0;

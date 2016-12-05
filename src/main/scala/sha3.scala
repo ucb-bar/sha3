@@ -5,10 +5,9 @@ package sha3
 //import Chisel.Implicits._
 import Chisel._
 
-import rocket._
-
-import cde.{Parameters, Field, Ex, World, ViewSym, Knob, Dump, Config}
-import cde.Implicits._
+import rocket.RoCC
+import rocket.RoccNPTWPorts
+import config._
 
 case object WidthP extends Field[Int]
 case object Stages extends Field[Int]
@@ -51,67 +50,77 @@ class Sha3Accel()(implicit p: Parameters) extends SimpleRoCC()(p) {
   //RoCC Interface defined in testMems.scala
   //cmd
   //resp
-  io.resp.valid := Bool(false) //Sha3 never returns values with the resp
+  val dummy_resp = Reg(init=Bool(false))
+  val req_rd = Reg(io.cmd.bits.inst.rd)
+  when (io.cmd.fire()) {
+    dummy_resp := Bool(true)
+    req_rd := io.cmd.bits.inst.rd
+  }
+  when (io.resp.fire()) {
+    dummy_resp := Bool(false)
+  }
+  io.resp.valid := dummy_resp //RoCC macros to emit custom instructions currently always set xd so send a dummy response
+  io.resp.bits.rd := req_rd
+  io.resp.bits.data := UInt(0)
   //mem
   //busy
 
   val ctrl = Module(new CtrlModule(W,S)(p))
-  
-  ctrl.io.rocc_req_val   <> io.cmd.valid
-  ctrl.io.rocc_req_rdy   <> io.cmd.ready
-  ctrl.io.rocc_funct     <> io.cmd.bits.inst.funct
-  ctrl.io.rocc_rs1       <> io.cmd.bits.rs1
-  ctrl.io.rocc_rs2       <> io.cmd.bits.rs2
-  ctrl.io.rocc_rd        <> io.cmd.bits.inst.rd
-  ctrl.io.busy           <> io.busy
 
-  ctrl.io.dmem_req_val   <> io.mem.req.valid
-  ctrl.io.dmem_req_rdy   <> io.mem.req.ready
-  ctrl.io.dmem_req_tag   <> io.mem.req.bits.tag
-  ctrl.io.dmem_req_addr  <> io.mem.req.bits.addr
-  ctrl.io.dmem_req_cmd   <> io.mem.req.bits.cmd
-  ctrl.io.dmem_req_typ   <> io.mem.req.bits.typ
+  ctrl.io.rocc_req_val   := io.cmd.valid
+  io.cmd.ready           := ctrl.io.rocc_req_val
+  ctrl.io.rocc_funct     := io.cmd.bits.inst.funct
+  ctrl.io.rocc_rs1       := io.cmd.bits.rs1
+  ctrl.io.rocc_rs2       := io.cmd.bits.rs2
+  ctrl.io.rocc_rd        := io.cmd.bits.inst.rd
+  io.busy                := ctrl.io.busy
 
-  ctrl.io.dmem_resp_val  <> io.mem.resp.valid
-  ctrl.io.dmem_resp_tag  <> io.mem.resp.bits.tag
+  io.mem.req.valid       := ctrl.io.dmem_req_val
+  ctrl.io.dmem_req_rdy   := io.mem.req.ready
+  io.mem.req.bits.tag    := ctrl.io.dmem_req_tag
+  io.mem.req.bits.addr   := ctrl.io.dmem_req_addr
+  io.mem.req.bits.cmd    := ctrl.io.dmem_req_cmd
+  io.mem.req.bits.typ    :=  ctrl.io.dmem_req_typ
+
+  ctrl.io.dmem_resp_val  := io.mem.resp.valid
+  ctrl.io.dmem_resp_tag  := io.mem.resp.bits.tag
   ctrl.io.dmem_resp_data := io.mem.resp.bits.data
 
   val dpath = Module(new DpathModule(W,S))
 
-  dpath.io.message_in <> ctrl.io.buffer_out
+  dpath.io.message_in := ctrl.io.buffer_out
   io.mem.req.bits.data := dpath.io.hash_out(ctrl.io.windex)
+  io.mem.req.bits.phys := Bool(false)
 
   //ctrl.io <> dpath.io
-  ctrl.io.absorb <> dpath.io.absorb
-  ctrl.io.init <> dpath.io.init
-  ctrl.io.write <> dpath.io.write
-  ctrl.io.round <> dpath.io.round
-  ctrl.io.stage <> dpath.io.stage
-  ctrl.io.aindex <> dpath.io.aindex
+  dpath.io.absorb := ctrl.io.absorb
+  dpath.io.init := ctrl.io.init
+  dpath.io.write := ctrl.io.write
+  dpath.io.round :=  ctrl.io.round
+  dpath.io.stage :=  ctrl.io.stage
+  dpath.io.aindex := ctrl.io.aindex
 
 }
 
-class DefaultConfig() extends Config {
-  override val topDefinitions:World.TopDefs = {
-    (pname,site,here) => pname match {
-      case WidthP => 64
-      case Stages => Knob("stages")
-      case FastMem => Knob("fast_mem")
-      case BufferSram => Dump(Knob("buffer_sram"))
+class DefaultConfig extends Config(
+  (pname,site,here) => pname match {
+    case WidthP => 64
+    case Stages => 1
+    case FastMem => true
+    case BufferSram => false
       //case "multi_vt" => Dump(Knob("multi_vt"))
-    }
-  }
-  override val topConstraints:List[ViewSym=>Ex[Boolean]] = List(
-    ex => ex(WidthP) === 64,
-    ex => ex(Stages) >= 1 && ex(Stages) <= 4 && (ex(Stages)%2 === 0 || ex(Stages) === 1),
-    ex => ex(FastMem) === ex(FastMem),
-    ex => ex(BufferSram) === ex(BufferSram)
-    //ex => ex[Boolean]("multi_vt") === ex[Boolean]("multi_vt")
-  )
-  override val knobValues:Any=>Any = {
-    case "stages" => 1
-    case "fast_mem" => true
-    case "buffer_sram" => false
-    //case "multi_vt" => true
-  }
-}
+    case _ => throw new CDEMatchError
+  })
+  // override val topConstraints:List[ViewSym=>Ex[Boolean]] = List(
+  //   ex => ex(WidthP) === 64,
+  //   ex => ex(Stages) >= 1 && ex(Stages) <= 4 && (ex(Stages)%2 === 0 || ex(Stages) === 1),
+  //   ex => ex(FastMem) === ex(FastMem),
+  //   ex => ex(BufferSram) === ex(BufferSram)
+  //   //ex => ex[Boolean]("multi_vt") === ex[Boolean]("multi_vt")
+  // )
+  // override val knobValues:Any=>Any = {
+  //   case "stages" => 1
+  //   case "fast_mem" => true
+  //   case "buffer_sram" => false
+  //   //case "multi_vt" => true
+  // }

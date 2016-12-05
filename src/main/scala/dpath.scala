@@ -3,7 +3,6 @@
 package sha3
 
 import Chisel._
-import Node._
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
@@ -25,10 +24,10 @@ class DpathModule(val W: Int, val S: Int) extends Module {
     val stage  = UInt(INPUT,width=log2Up(S))
     val aindex = UInt(INPUT,width=log2Up(round_size_words))
     val message_in = Bits(INPUT, width = W)
-    val hash_out = Vec.fill(hash_size_words){Bits(OUTPUT, width = W)}
+    val hash_out = Vec(hash_size_words, Bits(OUTPUT, width = W))
   }
 
-  val state = Reg(init=Vec.fill(5*5){ Bits(0, width = W)})
+  val state = Reg(Vec(5*5, Bits(0, width = W)))
 
   //submodules
   val theta = Module(new ThetaModule(W)).io
@@ -37,7 +36,8 @@ class DpathModule(val W: Int, val S: Int) extends Module {
   val iota  = Module(new IotaModule(W))
 
   //default
-  theta.state_i := Vec.fill(25){Bits(0,W)}
+  for (i <- 0 until 25)
+    theta.state_i(i) := UInt(0, width=W)
   iota.io.round     := UInt(0)
 
   //connect submodules to each other
@@ -108,7 +108,7 @@ class DpathModule(val W: Int, val S: Int) extends Module {
     }
   }
 
-  val hash_res = Vec.fill(hash_size_words){Bits(width = W)}
+  val hash_res = Vec(hash_size_words, Bits(width = W))
   for( i <- 0 until hash_size_words){
     io.hash_out(i) := state(i*5)
   }
