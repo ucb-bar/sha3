@@ -7,7 +7,7 @@ import config._
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
-import rocket.constants.ScalarOpConstants._
+import rocket._
 
 import uncore.constants.MemoryOpConstants._
 

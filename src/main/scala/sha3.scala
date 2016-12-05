@@ -5,8 +5,7 @@ package sha3
 //import Chisel.Implicits._
 import Chisel._
 
-import rocket.RoCC
-import rocket.RoccNPTWPorts
+import rocket._
 import config._
 
 case object WidthP extends Field[Int]
