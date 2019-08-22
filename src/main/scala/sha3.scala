@@ -2,19 +2,16 @@
 //authors: Colin Schmidt, Adam Izraelevitz
 package sha3
 
-//import Chisel.Implicits._
 import Chisel._
+import freechips.rocketchip.tile._
+import freechips.rocketchip.config._
 
-import rocket._
+case object Sha3WidthP extends Field[Int]
+case object Sha3Stages extends Field[Int]
+case object Sha3FastMem extends Field[Boolean]
+case object Sha3BufferSram extends Field[Boolean]
 
-import cde.{Parameters, Field, Ex, World, ViewSym, Knob, Dump, Config}
-import cde.Implicits._
-
-case object WidthP extends Field[Int]
-case object Stages extends Field[Int]
-case object FastMem extends Field[Boolean]
-case object BufferSram extends Field[Boolean]
-
+/*
 abstract class SimpleRoCC()(implicit p: Parameters) extends RoCC()(p)
 {
   io.interrupt := Bool(false)
@@ -35,11 +32,16 @@ abstract class SimpleRoCC()(implicit p: Parameters) extends RoCC()(p)
   io.autl.grant.ready := Bool(false)
   for(i <- 0 until p(RoccNPTWPorts)) io.ptw(i).req.valid := Bool(false)
 }
+*/
 
-class Sha3Accel()(implicit p: Parameters) extends SimpleRoCC()(p) {
+class Sha3Accel(opcodes: OpcodeSet)(implicit p: Parameters) extends LazyRoCC(opcodes) {
+  override lazy val module = new Sha3AccelImp(this)
+}
+
+class Sha3AccelImp(outer: Sha3Accel)(implicit p: Parameters) extends LazyRoCCModuleImp(outer) {
   //parameters
-  val W = p(WidthP)
-  val S = p(Stages)
+  val W = p(Sha3WidthP)
+  val S = p(Sha3Stages)
   //constants
   val r = 2*256
   val c = 25*W - r
@@ -56,7 +58,7 @@ class Sha3Accel()(implicit p: Parameters) extends SimpleRoCC()(p) {
   //busy
 
   val ctrl = Module(new CtrlModule(W,S)(p))
-  
+
   ctrl.io.rocc_req_val   <> io.cmd.valid
   ctrl.io.rocc_req_rdy   <> io.cmd.ready
   ctrl.io.rocc_funct     <> io.cmd.bits.inst.funct
@@ -70,7 +72,7 @@ class Sha3Accel()(implicit p: Parameters) extends SimpleRoCC()(p) {
   ctrl.io.dmem_req_tag   <> io.mem.req.bits.tag
   ctrl.io.dmem_req_addr  <> io.mem.req.bits.addr
   ctrl.io.dmem_req_cmd   <> io.mem.req.bits.cmd
-  ctrl.io.dmem_req_typ   <> io.mem.req.bits.typ
+  ctrl.io.dmem_req_size   <> io.mem.req.bits.size
 
   ctrl.io.dmem_resp_val  <> io.mem.resp.valid
   ctrl.io.dmem_resp_tag  <> io.mem.resp.bits.tag
@@ -91,16 +93,13 @@ class Sha3Accel()(implicit p: Parameters) extends SimpleRoCC()(p) {
 
 }
 
-class DefaultConfig() extends Config {
-  override val topDefinitions:World.TopDefs = {
-    (pname,site,here) => pname match {
-      case WidthP => 64
-      case Stages => Knob("stages")
-      case FastMem => Knob("fast_mem")
-      case BufferSram => Dump(Knob("buffer_sram"))
-      //case "multi_vt" => Dump(Knob("multi_vt"))
-    }
-  }
+class WithSha3Accel extends Config ((site, here, up) => {
+      case Sha3WidthP => 64
+      case Sha3Stages => 1
+      case Sha3FastMem => true
+      case Sha3BufferSram => false
+  })
+  /*
   override val topConstraints:List[ViewSym=>Ex[Boolean]] = List(
     ex => ex(WidthP) === 64,
     ex => ex(Stages) >= 1 && ex(Stages) <= 4 && (ex(Stages)%2 === 0 || ex(Stages) === 1),
@@ -114,4 +113,4 @@ class DefaultConfig() extends Config {
     case "buffer_sram" => false
     //case "multi_vt" => true
   }
-}
+  */

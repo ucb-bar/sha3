@@ -3,7 +3,6 @@
 package sha3
 
 import Chisel._
-import Node._
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random

@@ -6,12 +6,15 @@ import Chisel._
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
-import cde.{Parameters, Config, Dump, Knob, Ex, ViewSym}
-import cde.Implicits._
+import Chisel.ImplicitConversions._
+import scala.collection.mutable.HashMap
+import freechips.rocketchip.tile.HasCoreParameters
+import freechips.rocketchip.rocket.constants.MemoryOpConstants
+import freechips.rocketchip.config._
 
-import uncore.constants.MemoryOpConstants._
-
-class CtrlModule(val W: Int, val S: Int)(implicit p: Parameters) extends Module() {//with MemoryOpConstants{
+class CtrlModule(val W: Int, val S: Int)(implicit val p: Parameters) extends Module
+  with HasCoreParameters
+  with MemoryOpConstants {
   val r = 2*256
   val c = 25*W - r
   val round_size_words = c/W
@@ -19,7 +22,7 @@ class CtrlModule(val W: Int, val S: Int)(implicit p: Parameters) extends Module(
   val hash_size_words = 256/W
   val bytes_per_word = W/8
 
-  val io = new Bundle { 
+  val io = new Bundle {
     val rocc_req_val      = Bool(INPUT)
     val rocc_req_rdy      = Bool(OUTPUT)
     val rocc_funct        = Bits(INPUT, 2)
@@ -34,7 +37,7 @@ class CtrlModule(val W: Int, val S: Int)(implicit p: Parameters) extends Module(
     val dmem_req_tag      = Bits(OUTPUT, 7)
     val dmem_req_addr     = Bits(OUTPUT, 32)
     val dmem_req_cmd      = Bits(OUTPUT, M_SZ)
-    val dmem_req_typ      = Bits(OUTPUT, MT_SZ)
+    val dmem_req_size     = Bits(OUTPUT, log2Ceil(coreDataBytes + 1))
 
     val dmem_resp_val     = Bool(INPUT) 
     val dmem_resp_tag     = Bits(INPUT, 7)
@@ -73,11 +76,11 @@ class CtrlModule(val W: Int, val S: Int)(implicit p: Parameters) extends Module(
 
   val dmem_resp_tag_reg = Reg(next=io.dmem_resp_tag)
   //memory pipe state
-  val fast_mem = p(FastMem)
+  val fast_mem = p(Sha3FastMem)
   val m_idle :: m_read :: m_wait :: m_pad :: m_absorb :: Nil = Enum(UInt(), 5)
   val mem_s = Reg(init=m_idle)
 
-  val buffer_sram = p(BufferSram)
+  val buffer_sram = p(Sha3BufferSram)
   //SRAM Buffer
   val buffer_mem = Mem(round_size_words, UInt(width = W))
   //Flip-Flop buffer
@@ -177,7 +180,7 @@ class CtrlModule(val W: Int, val S: Int)(implicit p: Parameters) extends Module(
   io.dmem_req_tag:= rindex
   io.dmem_req_addr:= Bits(0, 32)
   io.dmem_req_cmd:= M_XRD
-  io.dmem_req_typ:= MT_D
+  io.dmem_req_size:= log2Ceil(8).U
 
   val rindex_reg = Reg(next=rindex)
 
@@ -231,7 +234,7 @@ class CtrlModule(val W: Int, val S: Int)(implicit p: Parameters) extends Module(
       io.dmem_req_addr := msg_addr + (mindex << UInt(3))
       io.dmem_req_tag := mindex
       io.dmem_req_cmd := M_XRD
-      io.dmem_req_typ := MT_D
+      io.dmem_req_size := log2Ceil(8).U
 
       when(io.dmem_req_rdy && io.dmem_req_val){
         mindex := mindex + UInt(1)

@@ -6,6 +6,7 @@ import Chisel._
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
+import chisel3.iotesters.PeekPokeTester
 
 class IotaModule(val W: Int = 64) extends Module {
   val io = new Bundle { 
@@ -41,7 +42,7 @@ class IotaModule(val W: Int = 64) extends Module {
 */
 }
 
-class IotaModuleTests(c: IotaModule) extends Tester(c) {
+class IotaModuleTests(c: IotaModule) extends PeekPokeTester(c) {
     val W       = 64
     val maxInt  = 1 << (5*5*W)
       //val state_i = rnd.nextInt(maxInt)
@@ -54,6 +55,7 @@ class IotaModuleTests(c: IotaModule) extends Tester(c) {
       step(1)
       expect(c.io.state_o, out_state)
 }
+/*
 object iotaMain { 
   def main(args: Array[String]): Unit = {
     //chiselMainTest(Array[String]("--backend", "c", "--genHarness", "--compile", "--test"),
@@ -62,4 +64,4 @@ object iotaMain {
     }
   }
 }
-
+*/
