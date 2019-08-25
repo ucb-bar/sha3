@@ -11,8 +11,8 @@ import scala.util.Random
 class RhoPiModule(val W : Int = 64) extends Module {
   //val W = 64
   val io = new Bundle { 
-    val state_i = Vec.fill(25){Bits(INPUT, W)}
-    val state_o = Vec.fill(25){Bits(OUTPUT,W)}
+    val state_i = Vec(25, Bits(INPUT, W))
+    val state_o = Vec(25, Bits(OUTPUT,W))
   }
 
   //TODO: c code uses falttened rep for this

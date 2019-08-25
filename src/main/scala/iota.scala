@@ -10,8 +10,8 @@ import chisel3.iotesters.PeekPokeTester
 
 class IotaModule(val W: Int = 64) extends Module {
   val io = new Bundle { 
-    val state_i = Vec.fill(5*5){Bits(INPUT,W)}
-    val state_o = Vec.fill(5*5){Bits(OUTPUT,W)}
+    val state_i = Vec(5*5, Bits(INPUT,W))
+    val state_o = Vec(5*5, Bits(OUTPUT,W))
     val round = UInt(INPUT, 5)
   }
 

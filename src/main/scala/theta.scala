@@ -11,9 +11,9 @@ import scala.collection.mutable.ArrayBuffer
 class ThetaModule(val W: Int = 64) extends Module {
   //val W = 64
   //val W = RangeParam(64, 8, 64, 8).register(this, "W")
-  val io = new Bundle { 
-    val state_i = Vec.fill(5*5){Bits(INPUT, width = W)}
-    val state_o = Vec.fill(5*5){Bits(OUTPUT,width = W)}
+  val io = new Bundle {
+    val state_i = Vec(5*5, Bits(INPUT, width = W))
+    val state_o = Vec(5*5, Bits(OUTPUT,width = W))
   }
 
   val bc = Vec.fill(5){Wire(Bits(width = W))}

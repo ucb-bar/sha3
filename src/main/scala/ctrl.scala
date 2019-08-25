@@ -84,7 +84,7 @@ class CtrlModule(val W: Int, val S: Int)(implicit val p: Parameters) extends Mod
   //SRAM Buffer
   val buffer_mem = Mem(round_size_words, UInt(width = W))
   //Flip-Flop buffer
-  val buffer = Reg(init=Vec.fill(round_size_words) { UInt(width = W) })
+  val buffer = Reg(init=Vec.fill(round_size_words) { 0.U(W.W) })
 
   val buffer_raddr = Reg(UInt(width = log2Up(round_size_words)))
   val buffer_wen = Wire(Bool());

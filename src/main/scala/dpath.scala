@@ -24,7 +24,7 @@ class DpathModule(val W: Int, val S: Int) extends Module {
     val stage  = UInt(INPUT,width=log2Up(S))
     val aindex = UInt(INPUT,width=log2Up(round_size_words))
     val message_in = Bits(INPUT, width = W)
-    val hash_out = Vec.fill(hash_size_words){Bits(OUTPUT, width = W)}
+    val hash_out = Vec(hash_size_words, Bits(OUTPUT, width = W))
   }
 
   val state = Reg(init=Vec.fill(5*5){ Bits(0, width = W)})
@@ -107,7 +107,7 @@ class DpathModule(val W: Int, val S: Int) extends Module {
     }
   }
 
-  val hash_res = Vec.fill(hash_size_words){Bits(width = W)}
+  val hash_res = Wire(Vec(hash_size_words, Bits(width = W)))
   for( i <- 0 until hash_size_words){
     io.hash_out(i) := state(i*5)
   }
