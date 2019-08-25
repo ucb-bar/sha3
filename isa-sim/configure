@@ -707,6 +707,7 @@ enable_commitlog
 enable_histogram
 enable_dirty
 enable_misaligned
+enable_hcommitlog
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1355,6 +1356,7 @@ Optional Features:
                           bits
   --enable-misaligned     Enable hardware support for misaligned loads and
                           stores
+  --enable-hcommitlog     Enable Hwacha commit log generation
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -4773,6 +4775,64 @@ $as_echo "#define SHA3_ENABLED /**/" >>confdefs.h
 
     # Add subproject to our running list
 
+    subprojects="$subprojects hwacha"
+
+    # Process the subproject appropriately. If enabled add it to the
+    # $enabled_subprojects running shell variable, set a
+    # SUBPROJECT_ENABLED C define, and include the appropriate
+    # 'subproject.ac'.
+
+
+      { $as_echo "$as_me:${as_lineno-$LINENO}: configuring default subproject : hwacha" >&5
+$as_echo "$as_me: configuring default subproject : hwacha" >&6;}
+      ac_config_files="$ac_config_files hwacha.mk:hwacha/hwacha.mk.in"
+
+      enable_hwacha_sproj="yes"
+      subprojects_enabled="$subprojects_enabled hwacha"
+
+$as_echo "#define HWACHA_ENABLED /**/" >>confdefs.h
+
+      # Check whether --enable-hcommitlog was given.
+if test "${enable_hcommitlog+set}" = set; then :
+  enableval=$enable_hcommitlog;
+fi
+
+if test "x$enable_hcommitlog" = "xyes"; then :
+
+
+$as_echo "#define RISCV_ENABLE_HCOMMITLOG /**/" >>confdefs.h
+
+
+fi
+
+
+
+
+
+
+    # Determine if this is a required or an optional subproject
+
+
+
+    # Determine if there is a group with the same name
+
+
+
+    # Create variations of the subproject name suitable for use as a CPP
+    # enabled define, a shell enabled variable, and a shell function
+
+
+
+
+
+
+
+
+
+
+
+    # Add subproject to our running list
+
     subprojects="$subprojects dummy_rocc"
 
     # Process the subproject appropriately. If enabled add it to the
@@ -4918,6 +4978,8 @@ ac_config_files="$ac_config_files riscv-riscv.pc"
 ac_config_files="$ac_config_files riscv-softfloat.pc"
 
 ac_config_files="$ac_config_files riscv-dummy_rocc.pc"
+
+ac_config_files="$ac_config_files riscv-hwacha.pc"
 
 ac_config_files="$ac_config_files riscv-sha3.pc"
 
@@ -5616,6 +5678,7 @@ do
   case $ac_config_target in
     "riscv.mk") CONFIG_FILES="$CONFIG_FILES riscv.mk:riscv/riscv.mk.in" ;;
     "sha3.mk") CONFIG_FILES="$CONFIG_FILES sha3.mk:sha3/sha3.mk.in" ;;
+    "hwacha.mk") CONFIG_FILES="$CONFIG_FILES hwacha.mk:hwacha/hwacha.mk.in" ;;
     "dummy_rocc.mk") CONFIG_FILES="$CONFIG_FILES dummy_rocc.mk:dummy_rocc/dummy_rocc.mk.in" ;;
     "softfloat.mk") CONFIG_FILES="$CONFIG_FILES softfloat.mk:softfloat/softfloat.mk.in" ;;
     "spike_main.mk") CONFIG_FILES="$CONFIG_FILES spike_main.mk:spike_main/spike_main.mk.in" ;;
@@ -5625,6 +5688,7 @@ do
     "riscv-riscv.pc") CONFIG_FILES="$CONFIG_FILES riscv-riscv.pc" ;;
     "riscv-softfloat.pc") CONFIG_FILES="$CONFIG_FILES riscv-softfloat.pc" ;;
     "riscv-dummy_rocc.pc") CONFIG_FILES="$CONFIG_FILES riscv-dummy_rocc.pc" ;;
+    "riscv-hwacha.pc") CONFIG_FILES="$CONFIG_FILES riscv-hwacha.pc" ;;
     "riscv-sha3.pc") CONFIG_FILES="$CONFIG_FILES riscv-sha3.pc" ;;
     "riscv-spike_main.pc") CONFIG_FILES="$CONFIG_FILES riscv-spike_main.pc" ;;
 
