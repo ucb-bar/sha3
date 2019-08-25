@@ -38,7 +38,7 @@ public:
     msg_len = 0;
   }
 
-  reg_t custom0(rocc_insn_t insn, reg_t xs1, reg_t xs2)
+  reg_t custom2(rocc_insn_t insn, reg_t xs1, reg_t xs2)
   {
     switch (insn.funct)
     {

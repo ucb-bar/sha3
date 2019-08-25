@@ -24,12 +24,12 @@ int main() {
     // Invoke the acclerator and check responses
 
     // setup accelerator with addresses of input and output
-    //              opcode rd rs1          rs2          funct   
-    asm volatile ("custom0 0, %[msg_addr], %[hash_addr], 0" : : [msg_addr]"r"(&input), [hash_addr]"r"(&output));
+    //              opcode rd rs1          rs2          funct
+    asm volatile ("custom2 x0, %[msg_addr], %[hash_addr], 0" : : [msg_addr]"r"(&input), [hash_addr]"r"(&output));
 
     // Set length and compute hash
-    //              opcode rd rs1      rs2 funct   
-    asm volatile ("custom0 0, %[length], 0, 1" : : [length]"r"(ilen));
+    //              opcode rd rs1      rs2 funct
+    asm volatile ("custom2 x0, %[length], x0, 1" : : [length]"r"(ilen));
     asm volatile ("fence");
     // Check result
     int i = 0;
