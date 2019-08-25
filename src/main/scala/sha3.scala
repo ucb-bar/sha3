@@ -5,6 +5,7 @@ package sha3
 import Chisel._
 import freechips.rocketchip.tile._
 import freechips.rocketchip.config._
+import freechips.rocketchip.diplomacy._
 
 case object Sha3WidthP extends Field[Int]
 case object Sha3Stages extends Field[Int]
@@ -98,19 +99,10 @@ class WithSha3Accel extends Config ((site, here, up) => {
       case Sha3Stages => 1
       case Sha3FastMem => true
       case Sha3BufferSram => false
+      case BuildRoCC => Seq(
+        (p: Parameters) => {
+          val sha3 = LazyModule.apply(new Sha3Accel(OpcodeSet.custom2)(p))
+          sha3
+        }
+      )
   })
-  /*
-  override val topConstraints:List[ViewSym=>Ex[Boolean]] = List(
-    ex => ex(WidthP) === 64,
-    ex => ex(Stages) >= 1 && ex(Stages) <= 4 && (ex(Stages)%2 === 0 || ex(Stages) === 1),
-    ex => ex(FastMem) === ex(FastMem),
-    ex => ex(BufferSram) === ex(BufferSram)
-    //ex => ex[Boolean]("multi_vt") === ex[Boolean]("multi_vt")
-  )
-  override val knobValues:Any=>Any = {
-    case "stages" => 1
-    case "fast_mem" => true
-    case "buffer_sram" => false
-    //case "multi_vt" => true
-  }
-  */
