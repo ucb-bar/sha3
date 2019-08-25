@@ -61,19 +61,19 @@ class Sha3AccelImp(outer: Sha3Accel)(implicit p: Parameters) extends LazyRoCCMod
   val ctrl = Module(new CtrlModule(W,S)(p))
 
   ctrl.io.rocc_req_val   <> io.cmd.valid
-  ctrl.io.rocc_req_rdy   <> io.cmd.ready
+  io.cmd.ready := ctrl.io.rocc_req_rdy
   ctrl.io.rocc_funct     <> io.cmd.bits.inst.funct
   ctrl.io.rocc_rs1       <> io.cmd.bits.rs1
   ctrl.io.rocc_rs2       <> io.cmd.bits.rs2
   ctrl.io.rocc_rd        <> io.cmd.bits.inst.rd
-  ctrl.io.busy           <> io.busy
+  io.busy := ctrl.io.busy
 
-  ctrl.io.dmem_req_val   <> io.mem.req.valid
+  io.mem.req.valid := ctrl.io.dmem_req_val
   ctrl.io.dmem_req_rdy   <> io.mem.req.ready
-  ctrl.io.dmem_req_tag   <> io.mem.req.bits.tag
-  ctrl.io.dmem_req_addr  <> io.mem.req.bits.addr
-  ctrl.io.dmem_req_cmd   <> io.mem.req.bits.cmd
-  ctrl.io.dmem_req_size   <> io.mem.req.bits.size
+  io.mem.req.bits.tag := ctrl.io.dmem_req_tag
+  io.mem.req.bits.addr := ctrl.io.dmem_req_addr
+  io.mem.req.bits.cmd := ctrl.io.dmem_req_cmd
+  io.mem.req.bits.size := ctrl.io.dmem_req_size
 
   ctrl.io.dmem_resp_val  <> io.mem.resp.valid
   ctrl.io.dmem_resp_tag  <> io.mem.resp.bits.tag
@@ -85,12 +85,12 @@ class Sha3AccelImp(outer: Sha3Accel)(implicit p: Parameters) extends LazyRoCCMod
   io.mem.req.bits.data := dpath.io.hash_out(ctrl.io.windex)
 
   //ctrl.io <> dpath.io
-  ctrl.io.absorb <> dpath.io.absorb
-  ctrl.io.init <> dpath.io.init
-  ctrl.io.write <> dpath.io.write
-  ctrl.io.round <> dpath.io.round
-  ctrl.io.stage <> dpath.io.stage
-  ctrl.io.aindex <> dpath.io.aindex
+  dpath.io.absorb := ctrl.io.absorb
+  dpath.io.init := ctrl.io.init
+  dpath.io.write := ctrl.io.write
+  dpath.io.round := ctrl.io.round
+  dpath.io.stage := ctrl.io.stage
+  dpath.io.aindex := ctrl.io.aindex
 
 }
 
