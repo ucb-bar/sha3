@@ -145,7 +145,7 @@ class CtrlModule(val W: Int, val S: Int)(implicit val p: Parameters) extends Mod
   io.windex     := windex
 
   //misc padding signals
-  val first_pad = Bits("b0000_0001")
+  val first_pad = Bits(if (p(Sha3Keccak)) "b0000_0001" else "b0000_0110")
   val last_pad  = Bits("b1000_0000")
   val both_pad  = first_pad | last_pad
   //last word with message in it

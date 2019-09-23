@@ -2,6 +2,7 @@
 #include "mmu.h"
 #include "extension.h"
 #include "sha3.h"
+#include "config.h"
 
 constexpr uint64_t sha3_t::keccakf_rndc[24];
 constexpr int sha3_t::keccakf_rotc[24];
@@ -129,7 +130,13 @@ void sha3_t::sha3_final(sha3_state *sctx, uint8_t *out)
 {
   unsigned int i, inlen = sctx->partial;
 
-  sctx->buf[inlen++] = 1;
+#ifdef SHA3_ENABLE_KECCAK
+#define PAD 0x1
+#else /* FIPS 202 */
+#define PAD 0x6
+#endif
+
+  sctx->buf[inlen++] = PAD;
   memset(sctx->buf + inlen, 0, sctx->rsiz - inlen);
   sctx->buf[sctx->rsiz - 1] |= 0x80;
 

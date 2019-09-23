@@ -207,7 +207,13 @@ void sha3_final(sha3_state *sctx, uint8_t *out)
 {
   unsigned int i, inlen = sctx->partial;
 
-  sctx->buf[inlen++] = 1;
+#ifdef KECCAK
+#define PAD 0x1
+#else /* FIPS 202 */
+#define PAD 0x6
+#endif
+
+  sctx->buf[inlen++] = PAD;
   memset(sctx->buf + inlen, 0, sctx->rsiz - inlen);
   sctx->buf[sctx->rsiz - 1] |= 0x80;
 

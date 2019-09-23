@@ -1,0 +1,4 @@
+AC_ARG_ENABLE([keccak], AS_HELP_STRING([--enable-keccak], [Enable Keccak behavior for sha3]))
+AS_IF([test "x$enable_keccak" = "xyes"], [
+  AC_DEFINE([SHA3_ENABLE_KECCAK],, [Enable Keccak behavior for sha3])
+])

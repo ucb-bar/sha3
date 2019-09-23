@@ -707,6 +707,7 @@ enable_commitlog
 enable_histogram
 enable_dirty
 enable_misaligned
+enable_keccak
 enable_hcommitlog
 '
       ac_precious_vars='build_alias
@@ -1356,6 +1357,7 @@ Optional Features:
                           bits
   --enable-misaligned     Enable hardware support for misaligned loads and
                           stores
+  --enable-keccak         Enable Keccak behavior for sha3
   --enable-hcommitlog     Enable Hwacha commit log generation
 
 Optional Packages:
@@ -4747,6 +4749,18 @@ $as_echo "$as_me: configuring default subproject : sha3" >&6;}
 
 $as_echo "#define SHA3_ENABLED /**/" >>confdefs.h
 
+      # Check whether --enable-keccak was given.
+if test "${enable_keccak+set}" = set; then :
+  enableval=$enable_keccak;
+fi
+
+if test "x$enable_keccak" = "xyes"; then :
+
+
+$as_echo "#define SHA3_ENABLE_KECCAK /**/" >>confdefs.h
+
+
+fi
 
 
 

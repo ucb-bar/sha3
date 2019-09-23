@@ -33,7 +33,11 @@ int main() {
     // Check result
     int i = 0;
     unsigned char result[SHA3_256_DIGEST_SIZE] =
+#ifdef KECCAK
     {221,204,157,217,67,211,86,31,54,168,44,245,97,194,193,26,234,42,135,166,66,134,39,174,184,61,3,149,137,42,57,238};
+#else /* FIPS 202 */
+    {203,52,27,85,46,79,152,228,86,138,201,206,253,168,255,107,122,177,65,68,231,19,70,198,64,90,192,80,206,234,168,159};
+#endif
     //sha3ONE(input, ilen, result);
     for(i = 0; i < SHA3_256_DIGEST_SIZE; i++){
       //printf("output[%d]:%d ==? results[%d]:%d \n",i,output[i],i,result[i]);

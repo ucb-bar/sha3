@@ -87,6 +87,9 @@
 /* Define if subproject MCPPBS_SPROJ_NORM is enabled */
 #undef SHA3_ENABLED
 
+/* Enable Keccak behavior for sha3 */
+#undef SHA3_ENABLE_KECCAK
+
 /* Define if subproject MCPPBS_SPROJ_NORM is enabled */
 #undef SOFTFLOAT_ENABLED
 

@@ -11,6 +11,11 @@ case object Sha3WidthP extends Field[Int]
 case object Sha3Stages extends Field[Int]
 case object Sha3FastMem extends Field[Boolean]
 case object Sha3BufferSram extends Field[Boolean]
+/*
+ * Implement original Keccak candidate instead of the finalized FIPS 202
+ * specification, which differs in the padding behavior
+ */
+case object Sha3Keccak extends Field[Boolean]
 
 /*
 abstract class SimpleRoCC()(implicit p: Parameters) extends RoCC()(p)
@@ -99,6 +104,7 @@ class WithSha3Accel extends Config ((site, here, up) => {
       case Sha3Stages => 1
       case Sha3FastMem => true
       case Sha3BufferSram => false
+      case Sha3Keccak => false
       case BuildRoCC => Seq(
         (p: Parameters) => {
           val sha3 = LazyModule.apply(new Sha3Accel(OpcodeSet.custom2)(p))
