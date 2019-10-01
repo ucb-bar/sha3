@@ -100,6 +100,7 @@ class Sha3AccelImp(outer: Sha3Accel)(implicit p: Parameters) extends LazyRoCCMod
 
       dmem.io.status.valid := io.cmd.fire()
       dmem.io.status.bits := io.cmd.bits.status
+      dmem.io.sfence := ctrl.io.sfence
     }
     case None => dmem_ctrl(io.mem.req)
   }

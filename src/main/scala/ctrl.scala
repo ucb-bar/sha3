@@ -43,6 +43,8 @@ class CtrlModule(val W: Int, val S: Int)(implicit val p: Parameters) extends Mod
     val dmem_resp_tag     = Bits(INPUT, 7)
     val dmem_resp_data    = Bits(INPUT, W)
 
+    val sfence            = Bool(OUTPUT)
+
     //Sha3 Specific signals
     val round       = UInt(OUTPUT,width=5)
     val stage       = UInt(OUTPUT,width=log2Up(S))
@@ -181,6 +183,7 @@ class CtrlModule(val W: Int, val S: Int)(implicit val p: Parameters) extends Mod
   io.dmem_req_addr:= Bits(0, 32)
   io.dmem_req_cmd:= M_XRD
   io.dmem_req_size:= log2Ceil(8).U
+  io.sfence      := Bool(false)
 
   val rindex_reg = Reg(next=rindex)
 
@@ -200,6 +203,12 @@ class CtrlModule(val W: Int, val S: Int)(implicit val p: Parameters) extends Mod
         io.rocc_req_rdy := Bool(true)
         io.busy := Bool(true)
         msg_len := io.rocc_rs1
+      }
+      if (p(Sha3TLB).isDefined) {
+        when (io.rocc_funct === UInt(2)) {
+          io.rocc_req_rdy := Bool(true)
+          io.sfence := Bool(true)
+        }
       }
     }
   }

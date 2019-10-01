@@ -25,6 +25,7 @@ class DmemModuleImp(outer: DmemModule)(implicit p: Parameters) extends LazyModul
     val mem = Decoupled(new HellaCacheReq)
     val ptw = new TLBPTWIO
     val status = Valid(new MStatus).flip
+    val sfence = Bool(INPUT)
   })
 
   val (tl, edge) = outer.node.out.head
@@ -52,7 +53,11 @@ class DmemModuleImp(outer: DmemModule)(implicit p: Parameters) extends LazyModul
 
   io.ptw <> tlb.io.ptw
   tlb.io.ptw.status := status
-  tlb.io.sfence.valid := Bool(false) // FIXME
+  tlb.io.sfence.valid := io.sfence
+  tlb.io.sfence.bits.rs1 := Bool(false)
+  tlb.io.sfence.bits.rs2 := Bool(false)
+  tlb.io.sfence.bits.addr := UInt(0)
+  tlb.io.sfence.bits.asid := UInt(0)
 
   io.req.ready := Bool(false)
 
