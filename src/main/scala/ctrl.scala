@@ -76,6 +76,7 @@ class CtrlModule(val W: Int, val S: Int)(implicit val p: Parameters) extends Mod
   val rocc_rs2_reg = Reg(next=io.rocc_rs2)
   val rocc_rd_reg = Reg(next=io.rocc_rd)
 
+  val dmem_resp_val_reg = Reg(next=io.dmem_resp_val)
   val dmem_resp_tag_reg = Reg(next=io.dmem_resp_tag)
   //memory pipe state
   val fast_mem = p(Sha3FastMem)
@@ -674,7 +675,7 @@ class CtrlModule(val W: Int, val S: Int)(implicit val p: Parameters) extends Mod
     }
 
     //response
-    when(io.dmem_resp_val){
+    when(dmem_resp_val_reg){
       //there is a response from memory
       when(dmem_resp_tag_reg(4,0) >= UInt(round_size_words)) {
         //this is a response to a write
