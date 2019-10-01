@@ -6,6 +6,7 @@ import Chisel._
 import freechips.rocketchip.tile._
 import freechips.rocketchip.config._
 import freechips.rocketchip.diplomacy._
+import freechips.rocketchip.rocket.{TLBConfig, HellaCacheReq}
 
 case object Sha3WidthP extends Field[Int]
 case object Sha3Stages extends Field[Int]
@@ -40,8 +41,14 @@ abstract class SimpleRoCC()(implicit p: Parameters) extends RoCC()(p)
 }
 */
 
-class Sha3Accel(opcodes: OpcodeSet)(implicit p: Parameters) extends LazyRoCC(opcodes) {
+class Sha3Accel(opcodes: OpcodeSet)(implicit p: Parameters) extends LazyRoCC(
+    opcodes = opcodes, nPTWPorts = if (p(Sha3TLB).isDefined) 1 else 0) {
   override lazy val module = new Sha3AccelImp(this)
+  val dmemOpt = p(Sha3TLB).map { _ =>
+    val dmem = LazyModule(new DmemModule)
+    tlNode := dmem.node
+    dmem
+  }
 }
 
 class Sha3AccelImp(outer: Sha3Accel)(implicit p: Parameters) extends LazyRoCCModuleImp(outer) {
@@ -73,12 +80,29 @@ class Sha3AccelImp(outer: Sha3Accel)(implicit p: Parameters) extends LazyRoCCMod
   ctrl.io.rocc_rd        <> io.cmd.bits.inst.rd
   io.busy := ctrl.io.busy
 
-  io.mem.req.valid := ctrl.io.dmem_req_val
-  ctrl.io.dmem_req_rdy   <> io.mem.req.ready
-  io.mem.req.bits.tag := ctrl.io.dmem_req_tag
-  io.mem.req.bits.addr := ctrl.io.dmem_req_addr
-  io.mem.req.bits.cmd := ctrl.io.dmem_req_cmd
-  io.mem.req.bits.size := ctrl.io.dmem_req_size
+  val dmem_data = Wire(Bits())
+  private def dmem_ctrl(req: DecoupledIO[HellaCacheReq]) {
+    req.valid := ctrl.io.dmem_req_val
+    ctrl.io.dmem_req_rdy := req.ready
+    req.bits.tag := ctrl.io.dmem_req_tag
+    req.bits.addr := ctrl.io.dmem_req_addr
+    req.bits.cmd := ctrl.io.dmem_req_cmd
+    req.bits.size := ctrl.io.dmem_req_size
+    req.bits.data := dmem_data
+  }
+
+  outer.dmemOpt match {
+    case Some(m) => {
+      val dmem = m.module
+      dmem_ctrl(dmem.io.req)
+      io.mem.req <> dmem.io.mem
+      io.ptw.head <> dmem.io.ptw
+
+      dmem.io.status.valid := io.cmd.fire()
+      dmem.io.status.bits := io.cmd.bits.status
+    }
+    case None => dmem_ctrl(io.mem.req)
+  }
 
   ctrl.io.dmem_resp_val  <> io.mem.resp.valid
   ctrl.io.dmem_resp_tag  <> io.mem.resp.bits.tag
@@ -87,7 +111,7 @@ class Sha3AccelImp(outer: Sha3Accel)(implicit p: Parameters) extends LazyRoCCMod
   val dpath = Module(new DpathModule(W,S))
 
   dpath.io.message_in <> ctrl.io.buffer_out
-  io.mem.req.bits.data := dpath.io.hash_out(ctrl.io.windex)
+  dmem_data := dpath.io.hash_out(ctrl.io.windex)
 
   //ctrl.io <> dpath.io
   dpath.io.absorb := ctrl.io.absorb
@@ -105,6 +129,7 @@ class WithSha3Accel extends Config ((site, here, up) => {
       case Sha3FastMem => true
       case Sha3BufferSram => false
       case Sha3Keccak => false
+      case Sha3TLB => Some(TLBConfig(nEntries = 2, nSectors = 1, nSuperpageEntries = 1))
       case BuildRoCC => Seq(
         (p: Parameters) => {
           val sha3 = LazyModule.apply(new Sha3Accel(OpcodeSet.custom2)(p))
