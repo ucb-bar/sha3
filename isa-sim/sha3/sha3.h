@@ -67,6 +67,9 @@ public:
 
         break;
 
+      case 2: // sfence
+        break;
+
       default:
         illegal_instruction();
     }

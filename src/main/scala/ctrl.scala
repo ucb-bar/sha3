@@ -43,6 +43,8 @@ class CtrlModule(val W: Int, val S: Int)(implicit val p: Parameters) extends Mod
     val dmem_resp_tag     = Bits(INPUT, 7)
     val dmem_resp_data    = Bits(INPUT, W)
 
+    val sfence            = Bool(OUTPUT)
+
     //Sha3 Specific signals
     val round       = UInt(OUTPUT,width=5)
     val stage       = UInt(OUTPUT,width=log2Up(S))
@@ -74,6 +76,7 @@ class CtrlModule(val W: Int, val S: Int)(implicit val p: Parameters) extends Mod
   val rocc_rs2_reg = Reg(next=io.rocc_rs2)
   val rocc_rd_reg = Reg(next=io.rocc_rd)
 
+  val dmem_resp_val_reg = Reg(next=io.dmem_resp_val)
   val dmem_resp_tag_reg = Reg(next=io.dmem_resp_tag)
   //memory pipe state
   val fast_mem = p(Sha3FastMem)
@@ -181,6 +184,7 @@ class CtrlModule(val W: Int, val S: Int)(implicit val p: Parameters) extends Mod
   io.dmem_req_addr:= Bits(0, 32)
   io.dmem_req_cmd:= M_XRD
   io.dmem_req_size:= log2Ceil(8).U
+  io.sfence      := Bool(false)
 
   val rindex_reg = Reg(next=rindex)
 
@@ -200,6 +204,12 @@ class CtrlModule(val W: Int, val S: Int)(implicit val p: Parameters) extends Mod
         io.rocc_req_rdy := Bool(true)
         io.busy := Bool(true)
         msg_len := io.rocc_rs1
+      }
+      if (p(Sha3TLB).isDefined) {
+        when (io.rocc_funct === UInt(2)) {
+          io.rocc_req_rdy := Bool(true)
+          io.sfence := Bool(true)
+        }
       }
     }
   }
@@ -665,7 +675,7 @@ class CtrlModule(val W: Int, val S: Int)(implicit val p: Parameters) extends Mod
     }
 
     //response
-    when(io.dmem_resp_val){
+    when(dmem_resp_val_reg){
       //there is a response from memory
       when(dmem_resp_tag_reg(4,0) >= UInt(round_size_words)) {
         //this is a response to a write
