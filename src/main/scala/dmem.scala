@@ -41,15 +41,13 @@ class DmemModuleImp(outer: DmemModule)(implicit p: Parameters) extends LazyModul
     status := io.status.bits
   }
 
-  val s_tlb :: s_mem :: s_xcpt :: Nil = Enum(UInt(), 3)
-  val state = Reg(init = s_tlb)
-
   val tlb = Module(new TLB(false, log2Ceil(coreDataBytes), p(Sha3TLB).get)(edge, p))
-  tlb.io.req.valid := Bool(false)
+  tlb.io.req.valid := io.req.valid
   tlb.io.req.bits.vaddr := io.req.bits.addr
   tlb.io.req.bits.size := io.req.bits.size
   tlb.io.req.bits.cmd := io.req.bits.cmd
   tlb.io.req.bits.passthrough := Bool(false)
+  val tlb_ready = tlb.io.req.ready && !tlb.io.resp.miss
 
   io.ptw <> tlb.io.ptw
   tlb.io.ptw.status := status
@@ -58,35 +56,21 @@ class DmemModuleImp(outer: DmemModule)(implicit p: Parameters) extends LazyModul
   tlb.io.sfence.bits.rs2 := Bool(false)
   tlb.io.sfence.bits.addr := UInt(0)
   tlb.io.sfence.bits.asid := UInt(0)
+  tlb.io.kill := Bool(false)
 
-  io.req.ready := Bool(false)
+  io.req.ready := io.mem.ready && tlb_ready
 
-  io.mem.valid := Bool(false)
+  io.mem.valid := io.req.valid && tlb_ready
   io.mem.bits := io.req.bits
   io.mem.bits.addr := tlb.io.resp.paddr
-  io.mem.bits.signed := Bool(false)
+  /*
+   * FIXME: Asserting phys sets io.req.bits.passthrough to true in the
+   * DCache TLB, which causes it to assume that the request originates
+   * from the PTW and treat it as a supervisor access.  This may lead to
+   * spurious PMP exceptions (io.resp.ae.ld) even when the actual
+   * privilege level is M-mode.
+   */
   io.mem.bits.phys := Bool(true)
 
-  val xcpt = Seq(tlb.io.resp.pf, tlb.io.resp.ae, tlb.io.resp.ma).
-    map(x => x.ld || x.st).reduce(_ || _)
-
-  switch (state) {
-    is (s_tlb) {
-      tlb.io.req.valid := io.req.valid
-      when (tlb.io.req.fire()) {
-        when (tlb.io.resp.miss || xcpt) {
-          state := s_xcpt
-        } .otherwise {
-          state := s_mem
-        }
-      }
-    }
-    is (s_mem) {
-      io.mem.valid := Bool(true)
-      io.req.ready := io.mem.ready
-      when (io.mem.ready) {
-        state := s_tlb
-      }
-    }
-  }
+  // FIXME: Check TLB exceptions
 }

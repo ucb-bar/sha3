@@ -89,6 +89,8 @@ class Sha3AccelImp(outer: Sha3Accel)(implicit p: Parameters) extends LazyRoCCMod
     req.bits.cmd := ctrl.io.dmem_req_cmd
     req.bits.size := ctrl.io.dmem_req_size
     req.bits.data := dmem_data
+    req.bits.signed := Bool(false)
+    req.bits.phys := Bool(false)
   }
 
   outer.dmemOpt match {
@@ -130,7 +132,7 @@ class WithSha3Accel extends Config ((site, here, up) => {
       case Sha3FastMem => true
       case Sha3BufferSram => false
       case Sha3Keccak => false
-      case Sha3TLB => Some(TLBConfig(nEntries = 2, nSectors = 1, nSuperpageEntries = 1))
+      case Sha3TLB => Some(TLBConfig(nEntries = 4, nSectors = 1, nSuperpageEntries = 1))
       case BuildRoCC => Seq(
         (p: Parameters) => {
           val sha3 = LazyModule.apply(new Sha3Accel(OpcodeSet.custom2)(p))
