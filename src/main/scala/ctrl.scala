@@ -241,13 +241,14 @@ class CtrlModule(val W: Int, val S: Int)(implicit val p: Parameters) extends Mod
     //only read if we aren't writing
     when(state =/= s_write){
       io.dmem_req_val := read < msg_len && mindex < UInt(round_size_words)
-      io.dmem_req_addr := msg_addr + (mindex << UInt(3))
+      io.dmem_req_addr := msg_addr
       io.dmem_req_tag := mindex
       io.dmem_req_cmd := M_XRD
       io.dmem_req_size := log2Ceil(8).U
 
       when(io.dmem_req_rdy && io.dmem_req_val){
         mindex := mindex + UInt(1)
+        msg_addr := msg_addr + UInt(8)
         read := read + UInt(8)//read 8 bytes
         if(!fast_mem){
           mem_s := m_wait
@@ -293,9 +294,9 @@ class CtrlModule(val W: Int, val S: Int)(implicit val p: Parameters) extends Mod
         }.otherwise{
           //we have reached the end of this chunk
           mindex := mindex + UInt(1)
+          msg_addr := msg_addr + UInt(8)
           read := read + UInt(8)//read 8 bytes
           //we sent all the requests
-          msg_addr := msg_addr + UInt(round_size_words << 3)
           when((msg_len < (read+UInt(8) ))){
             //but the buffer still isn't full
             buffer_valid := Bool(false)
@@ -666,12 +667,13 @@ class CtrlModule(val W: Int, val S: Int)(implicit val p: Parameters) extends Mod
     //we are writing 
     //request
     io.dmem_req_val := windex < UInt(hash_size_words)
-    io.dmem_req_addr := hash_addr + (windex << UInt(3))
+    io.dmem_req_addr := hash_addr
     io.dmem_req_tag := UInt(round_size_words) + windex
     io.dmem_req_cmd := M_XWR
 
     when(io.dmem_req_rdy){
       windex := windex + UInt(1)
+      hash_addr := hash_addr + UInt(8)
     }
 
     //response
