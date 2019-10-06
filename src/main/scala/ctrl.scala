@@ -34,8 +34,8 @@ class CtrlModule(val W: Int, val S: Int)(implicit val p: Parameters) extends Mod
 
     val dmem_req_val      = Bool(OUTPUT)
     val dmem_req_rdy      = Bool(INPUT)
-    val dmem_req_tag      = Bits(OUTPUT, 7)
-    val dmem_req_addr     = Bits(OUTPUT, 32)
+    val dmem_req_tag      = Bits(OUTPUT, dcacheReqTagBits)
+    val dmem_req_addr     = Bits(OUTPUT, coreMaxAddrBits)
     val dmem_req_cmd      = Bits(OUTPUT, M_SZ)
     val dmem_req_size     = Bits(OUTPUT, log2Ceil(coreDataBytes + 1))
 
@@ -56,6 +56,8 @@ class CtrlModule(val W: Int, val S: Int)(implicit val p: Parameters) extends Mod
 
     val buffer_out  = Bits(OUTPUT,width=W)
   }
+
+  require(dcacheReqTagBits >= 7)
 
   //RoCC HANDLER
   //rocc pipe state
