@@ -101,6 +101,7 @@ class DpathModule(val W: Int, val S: Int) extends Module {
 
   when(io.absorb){
     state := state
+    printf(midas.targetutils.SynthesizePrintf("SHA3 finished an iteration with index %d and message %x\n", io.aindex, io.message_in))
     when(io.aindex < UInt(round_size_words)){
       state((io.aindex%UInt(5))*UInt(5)+(io.aindex/UInt(5))) := 
         state((io.aindex%UInt(5))*UInt(5)+(io.aindex/UInt(5))) ^ io.message_in
