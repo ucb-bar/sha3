@@ -5,7 +5,7 @@ package sha3
 import Chisel._
 import freechips.rocketchip.config.{Field, Parameters}
 import freechips.rocketchip.tile.HasCoreParameters
-import freechips.rocketchip.rocket.{HellaCacheReq, TLB, TLBPTWIO, TLBConfig, MStatus}
+import freechips.rocketchip.rocket.{HellaCacheReq, TLB, TLBPTWIO, TLBConfig, MStatus, PRV}
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.tilelink._
 
@@ -70,7 +70,7 @@ class DmemModuleImp(outer: DmemModule)(implicit p: Parameters) extends LazyModul
    * spurious PMP exceptions (io.resp.ae.ld) even when the actual
    * privilege level is M-mode.
    */
-  io.mem.bits.phys := Bool(true)
+  io.mem.bits.phys := (status.dprv =/= UInt(PRV.M))
 
   // FIXME: Check TLB exceptions
 }
