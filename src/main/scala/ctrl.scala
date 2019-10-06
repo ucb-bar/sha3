@@ -379,7 +379,7 @@ class CtrlModule(val W: Int, val S: Int)(implicit val p: Parameters) extends Mod
         //there is a special case where we need to pad on a word boundary
         //when we have to put in first_pad here rather than just all zeros
         when(byte_offset === UInt(0) && (pindex === words_filled+UInt(1))
-             && words_filled > UInt(0)){
+             && mindex =/= UInt(0)){
           if(buffer_sram){
             buffer_wen := Bool(true)
             buffer_waddr := pindex
@@ -517,7 +517,7 @@ class CtrlModule(val W: Int, val S: Int)(implicit val p: Parameters) extends Mod
           }
         }.otherwise{
           //this is only valid if we didn't fill any words
-          when(words_filled === UInt(0) && byte_offset === UInt(0)){
+          when(mindex === UInt(0) && byte_offset === UInt(0)){
             if(buffer_sram){
               buffer_wen := Bool(true)
               buffer_waddr := pindex
