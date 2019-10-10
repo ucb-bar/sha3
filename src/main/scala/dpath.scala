@@ -6,8 +6,9 @@ import Chisel._
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
+import freechips.rocketchip.config.Parameters
 
-class DpathModule(val W: Int, val S: Int) extends Module {
+class DpathModule(val W: Int, val S: Int)(implicit p: Parameters) extends Module {
   //constants
   val r = 2*256
   val c = 25*W - r
@@ -101,6 +102,9 @@ class DpathModule(val W: Int, val S: Int) extends Module {
 
   when(io.absorb){
     state := state
+    if(p(Sha3PrintfEnable)){
+      printf(midas.targetutils.SynthesizePrintf("SHA3 finished an iteration with index %d and message %x\n", io.aindex, io.message_in))
+    }
     when(io.aindex < UInt(round_size_words)){
       state((io.aindex%UInt(5))*UInt(5)+(io.aindex/UInt(5))) := 
         state((io.aindex%UInt(5))*UInt(5)+(io.aindex/UInt(5))) ^ io.message_in
