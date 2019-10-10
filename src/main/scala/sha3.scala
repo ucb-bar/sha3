@@ -18,7 +18,8 @@ case object Sha3BufferSram extends Field[Boolean]
  */
 case object Sha3Keccak extends Field[Boolean]
 /*
- * Enable specific printf's
+ * Enable specific printf's. This is used to demonstrate MIDAS
+ * printf's during the MICRO2019 tutorial.
  */
 case object Sha3PrintfEnable extends Field[Boolean](false)
 
