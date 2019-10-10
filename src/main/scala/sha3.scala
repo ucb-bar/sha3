@@ -17,6 +17,11 @@ case object Sha3BufferSram extends Field[Boolean]
  * specification, which differs in the padding behavior
  */
 case object Sha3Keccak extends Field[Boolean]
+/*
+ * Enable specific printf's. This is used to demonstrate MIDAS
+ * printf's during the MICRO2019 tutorial.
+ */
+case object Sha3PrintfEnable extends Field[Boolean](false)
 
 /*
 abstract class SimpleRoCC()(implicit p: Parameters) extends RoCC()(p)
@@ -111,7 +116,7 @@ class Sha3AccelImp(outer: Sha3Accel)(implicit p: Parameters) extends LazyRoCCMod
   ctrl.io.dmem_resp_tag  <> io.mem.resp.bits.tag
   ctrl.io.dmem_resp_data := io.mem.resp.bits.data
 
-  val dpath = Module(new DpathModule(W,S))
+  val dpath = Module(new DpathModule(W,S)(p))
 
   dpath.io.message_in <> ctrl.io.buffer_out
   dmem_data := dpath.io.hash_out(ctrl.io.windex)
@@ -127,16 +132,20 @@ class Sha3AccelImp(outer: Sha3Accel)(implicit p: Parameters) extends LazyRoCCMod
 }
 
 class WithSha3Accel extends Config ((site, here, up) => {
-      case Sha3WidthP => 64
-      case Sha3Stages => 1
-      case Sha3FastMem => true
-      case Sha3BufferSram => false
-      case Sha3Keccak => false
-      case Sha3TLB => Some(TLBConfig(nEntries = 4, nSectors = 1, nSuperpageEntries = 1))
-      case BuildRoCC => Seq(
-        (p: Parameters) => {
-          val sha3 = LazyModule.apply(new Sha3Accel(OpcodeSet.custom2)(p))
-          sha3
-        }
-      )
-  })
+  case Sha3WidthP => 64
+  case Sha3Stages => 1
+  case Sha3FastMem => true
+  case Sha3BufferSram => false
+  case Sha3Keccak => false
+  case Sha3TLB => Some(TLBConfig(nEntries = 4, nSectors = 1, nSuperpageEntries = 1))
+  case BuildRoCC => Seq(
+    (p: Parameters) => {
+      val sha3 = LazyModule.apply(new Sha3Accel(OpcodeSet.custom2)(p))
+      sha3
+    }
+  )
+})
+
+class WithSha3Printf extends Config((site, here, up) => {
+  case Sha3PrintfEnable => true
+})
