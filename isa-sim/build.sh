@@ -13,7 +13,7 @@ if [ $SUBSTATUS == 0 ]; then
   echo "Updating riscv-isa-sim submodule:"
   git submodule update --init riscv-isa-sim
 fi
-exit
+
 # Build the custom spike
 if [ ! -d $SPIKE_SRC/build ]; then
   echo "Configuring Spike:"
