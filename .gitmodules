@@ -1,0 +1,3 @@
+[submodule "isa-sim/riscv-isa-sim"]
+	path = isa-sim/riscv-isa-sim
+	url = https://github.com/riscv/riscv-isa-sim.git

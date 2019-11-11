@@ -45,9 +45,6 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
-/* Define if subproject MCPPBS_SPROJ_NORM is enabled */
-#undef HWACHA_ENABLED
-
 /* Define to the address where bug reports for this package should be sent. */
 #undef PACKAGE_BUGREPORT
 
@@ -74,9 +71,6 @@
 
 /* Enable hardware management of PTE accessed and dirty bits */
 #undef RISCV_ENABLE_DIRTY
-
-/* Enable Hwacha commit log generation */
-#undef RISCV_ENABLE_HCOMMITLOG
 
 /* Enable PC histogram generation */
 #undef RISCV_ENABLE_HISTOGRAM
