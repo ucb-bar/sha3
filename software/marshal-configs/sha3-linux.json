@@ -1,0 +1,13 @@
+{
+  "name" : "sha3-linux",
+  "base" : "br-base.json",
+  "workdir" : "..",
+  "host-init" : "build.sh",
+  "files" : [
+    ["benchmarks/linux/sha3-sw.riscv", "/root/sha3-sw"],
+    ["benchmarks/linux/sha3-rocc.riscv", "/root/sha3-rocc"]
+  ],
+  "linux-src" : "linux",
+  "spike" : "../isa-sim/spike-local/bin/spike",
+  "spike-args" : "--extension=sha3"
+}

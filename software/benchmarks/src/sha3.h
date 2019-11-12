@@ -1,12 +1,47 @@
-// This code was written by Dr. Markku-Juhani O. Saarinen
-// who graciously donated it to the public domain.
-// See http://www.mjos.fi/dist/readable_keccak.tgz for the 
-// original source code.
+// Define reference (software) sha3 
 
-// Modifications made by Jesse Kornblum.
-// $Id$
+#ifndef __SHA3_H
+#define __SHA3_H
 
-#include "sha3.h"
+#include <stdint.h>
+#include <inttypes.h>
+#include <stdio.h>
+#include <string.h>
+
+#define SHA3_224_DIGEST_SIZE (224 / 8)
+#define SHA3_224_BLOCK_SIZE (200 - 2 * SHA3_224_DIGEST_SIZE)
+
+#define SHA3_256_DIGEST_SIZE (256 / 8)
+#define SHA3_256_BLOCK_SIZE (200 - 2 * SHA3_256_DIGEST_SIZE)
+
+#define SHA3_384_DIGEST_SIZE (384 / 8)
+#define SHA3_384_BLOCK_SIZE (200 - 2 * SHA3_384_DIGEST_SIZE)
+
+#define SHA3_512_DIGEST_SIZE (512 / 8)
+#define SHA3_512_BLOCK_SIZE (200 - 2 * SHA3_512_DIGEST_SIZE)
+
+#define SHA3_DEFAULT_BLOCK_SIZE    SHA3_256_BLOCK_SIZE
+#define SHA3_DEFAULT_DIGEST_SIZE   SHA3_256_DIGEST_SIZE
+
+int sha3ONE(unsigned char *, unsigned int, unsigned char *);
+
+typedef struct {
+  uint64_t st[25];
+  unsigned int md_len;
+  unsigned int rsiz;
+  unsigned int rsizw;
+  
+  unsigned int partial;
+  uint8_t buf[SHA3_DEFAULT_BLOCK_SIZE];  
+} sha3_state;
+
+void sha3_init(sha3_state *sctx);
+void sha3_update(sha3_state *sctx, const uint8_t *data, unsigned int len);
+void sha3_final(sha3_state *sctx, uint8_t *out);
+
+void hash_init_sha3(void * ctx);
+void hash_update_sha3(void * ctx, const uint8_t * input, size_t length);
+void hash_final_sha3(void * ctx, unsigned char * digest);
 
 #define KECCAK_ROUNDS 24
 
@@ -56,7 +91,7 @@ void printState(uint64_t st[25])
   int i,j;
   for(i = 0; i<5; i++){
      for(j = 0; j<5; j++){
-       printf("%016llx ", st[i+j*5]);
+       printf("%016" PRIx64, st[i+j*5]);
      }
      printf("\n");
   }
@@ -69,8 +104,8 @@ static void keccakf(uint64_t st[25], int rounds)
   int i, j, round_num;
   uint64_t t, bc[5];
 
-  printf("Starting\n");
-  printState(st);
+  //printf("Starting\n");
+  //printState(st);
   for (round_num = 0; round_num < rounds; round_num++) 
   {
     // Theta
@@ -84,8 +119,8 @@ static void keccakf(uint64_t st[25], int rounds)
   st[j + i] ^= t;
       }
 
-    printf("After Theta:\n");
-    printState(st);
+    //printf("After Theta:\n");
+    //printState(st);
     // Rho Pi
     t = st[1];
     for (i = 0; i < 24; i++) 
@@ -95,8 +130,8 @@ static void keccakf(uint64_t st[25], int rounds)
       st[j] = ROTL64(t, keccakf_rotc[i]);
       t = bc[0];
     }
-    printf("After RhoPi:\n");
-    printState(st);
+    //printf("After RhoPi:\n");
+    //printState(st);
 
     //  Chi
     for (j = 0; j < 25; j += 5) 
@@ -107,12 +142,12 @@ static void keccakf(uint64_t st[25], int rounds)
   st[j + i] ^= (~bc[(i + 1) % 5]) & bc[(i + 2) % 5];
     }
 
-    printf("After Chi:\n");
-    printState(st);
+    //printf("After Chi:\n");
+    //printState(st);
     //  Iota
     st[0] ^= keccakf_rndc[round_num];
-    printf("After Iota:\n");
-    printState(st);
+    //printf("After Round %d:\n",round_num);
+    //printState(st);
   }
 }
 
@@ -173,7 +208,13 @@ void sha3_final(sha3_state *sctx, uint8_t *out)
 {
   unsigned int i, inlen = sctx->partial;
 
-  sctx->buf[inlen++] = 1;
+#ifdef KECCAK
+#define PAD 0x1
+#else /* FIPS 202 */
+#define PAD 0x6
+#endif
+
+  sctx->buf[inlen++] = PAD;
   memset(sctx->buf + inlen, 0, sctx->rsiz - inlen);
   sctx->buf[sctx->rsiz - 1] |= 0x80;
 
@@ -192,3 +233,4 @@ void sha3_final(sha3_state *sctx, uint8_t *out)
 
   memset(sctx, 0, sizeof(*sctx));
 }
+#endif

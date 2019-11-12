@@ -1,2 +1,5 @@
 .*.swp
 target/
+*.doit*
+*.rv
+*.riscv

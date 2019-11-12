@@ -1,0 +1,9 @@
+{
+  "name" : "sha3-linux-jtr-test",
+  "base" : "sha3-linux-jtr.json",
+  "workdir" : "..",
+  "run" : "jtr/bench.sh",
+  "testing" : {
+    "refDir" : "test-reference/linux-jtr"
+  }
+}
