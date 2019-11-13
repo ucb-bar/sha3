@@ -2,10 +2,15 @@ This is an example set of workloads that uses the SHA3 rocc accelerator.
 
 # Getting Started
 
-When you first clone this repository, you should first update all submodules:
-
+When you first clone this repository, you should first update all submodules.
+If you only want to build bare-metal tests, you can skip the linux submodule
+update (which is slow) by only updating spike:
     cd sha3
-    git submodule update --init --recursive
+    git submodule update --init isa-sim/riscv-isa-sim
+
+To run linux-based workloads, you'll also need to update the linux submodule:
+    cd sha3    
+    git submodule update --init software/linux
 
 These workloads all use FireMarshal to build and test. All the examples in this
 README assume that marshal is on your PATH, if not, replace all calls to
