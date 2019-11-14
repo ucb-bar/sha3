@@ -1,0 +1,4 @@
+*.o
+*.dump
+*.riscv
+*.rv

@@ -1,0 +1,12 @@
+{
+  "name" : "sha3-bare-rocc",
+  "workdir" : "..",
+  "base" : "bare",
+  "host-init" : "build.sh",
+  "bin" : "benchmarks/bare/sha3-rocc.riscv",
+  "spike" : "../isa-sim/spike-local/bin/spike",
+  "spike-args" : "--extension=sha3",
+  "testing" : {
+    "refDir" : "test-reference/bare-rocc"
+  }
+}

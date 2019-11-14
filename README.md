@@ -1,5 +1,4 @@
-rocc-template
-=============
+# rocc-template
 Note - Compatible with rocket-chip:master (Commit ID 67ad36d74a1c7604792d0a751c013d70eee2a3a9)
 
 If cloned into rocket-chip directory use
@@ -27,3 +26,7 @@ or
     ./emulator-Top-Sha3CPPConfig pk ../sha3/tests/sha3-rocc.rv +dramsim
 
 The -bm versions of the code omit the print statements and will complete faster.
+
+# Software Workloads
+See software/README.md for more information on building software tests for this
+accelerator.

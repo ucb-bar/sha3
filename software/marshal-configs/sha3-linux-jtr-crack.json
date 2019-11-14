@@ -1,0 +1,6 @@
+{
+  "name" : "sha3-linux-jtr-crack",
+  "base" : "sha3-linux-jtr.json",
+  "workdir" : "..",
+  "run" : "jtr/crack.sh"
+}

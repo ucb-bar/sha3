@@ -1,0 +1,9 @@
+[submodule "isa-sim/riscv-isa-sim"]
+	path = isa-sim/riscv-isa-sim
+	url = https://github.com/riscv/riscv-isa-sim.git
+[submodule "software/linux"]
+	path = software/linux
+	url = https://github.com/firesim/linux.git
+[submodule "software/jtr/JohnTheRipper"]
+	path = software/jtr/JohnTheRipper
+	url = https://github.com/ucb-bar/JohnTheRipper.git
