@@ -5,6 +5,8 @@ It is mainly meant to be used in the
 [Chipyard development environment](https://github.com/ucb-bar/chipyard)
 but can be ported to other environments (i.e. plain
 [Rocket Chip](https://github.com/chipsalliance/rocket-chip)).
+For more information on how the accelerator works, please refer to the
+[SHA3 documentaion in Chipyard](https://chipyard.readthedocs.io/en/latest/Generators/SHA3.html).
 
 # Software Workloads
 
