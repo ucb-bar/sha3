@@ -1,32 +1,16 @@
-# rocc-template
-Note - Compatible with rocket-chip:master (Commit ID 67ad36d74a1c7604792d0a751c013d70eee2a3a9)
+# SHA3 RoCC Accelerator
 
-If cloned into rocket-chip directory use
-
-    ./install-symlinks
-
-You can then test it using the emulator
-
-    cd ../emulator && make CONFIG=Sha3CPPConfig run-asm-tests
-
-You can emulate the software implementation of sha3 by running
-
-    ./emulator-Top-Sha3CPPConfig pk ../sha3/tests/sha3-sw.rv +dramsim
-
-or
-
-    ./emulator-Top-Sha3CPPConfig pk ../sha3/tests/sha3-sw-bm.rv +dramsim
-
-You can emulate the accelerated sha3 by running
-
-    ./emulator-Top-Sha3CPPConfig pk ../sha3/tests/sha3-rocc-bm.rv +dramsim
-
-or 
-
-    ./emulator-Top-Sha3CPPConfig pk ../sha3/tests/sha3-rocc.rv +dramsim
-
-The -bm versions of the code omit the print statements and will complete faster.
+This is an accelerator that implements the Secure Hash Algorithm 3.
+It is mainly meant to be used in the
+[Chipyard development environment](https://github.com/ucb-bar/chipyard)
+but can be ported to other environments (i.e. plain
+[Rocket Chip](https://github.com/chipsalliance/rocket-chip)).
 
 # Software Workloads
-See software/README.md for more information on building software tests for this
+
+See [software/README.md](software/README.md) for more information on building software tests for this
 accelerator.
+
+# References
+
+https://people.eecs.berkeley.edu/~kubitron/courses/cs262a-F13/projects/reports/project11_report.pdf
