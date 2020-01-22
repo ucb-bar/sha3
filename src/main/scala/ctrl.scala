@@ -57,8 +57,6 @@ class CtrlModule(val W: Int, val S: Int)(implicit val p: Parameters) extends Mod
     val buffer_out  = Bits(OUTPUT,width=W)
   }
 
-  require(coreParams.dcacheReqTagBits >= 7)
-
   //RoCC HANDLER
   //rocc pipe state
   val r_idle :: r_eat_addr :: r_eat_len :: Nil = Enum(UInt(), 3)
