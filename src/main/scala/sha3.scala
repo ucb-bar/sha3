@@ -59,8 +59,8 @@ class WrapBundle(nPTWPorts: Int)(implicit p: Parameters) extends Bundle {
   val reset = Input(UInt(1.W))
 }
 
-class Sha3BlackBox(nPTWPorts: Int)(implicit p: Parameters) extends BlackBox with HasBlackBoxResource {
-  val io = IO(new WrapBundle(nPTWPorts))
+class Sha3BlackBox(implicit p: Parameters) extends BlackBox with HasBlackBoxResource {
+  val io = IO(new WrapBundle(0))
 
   addResource("/vsrc/Sha3BlackBox.v")
 }
@@ -96,7 +96,7 @@ class Sha3AccelImp(outer: Sha3Accel)(implicit p: Parameters) extends LazyRoCCMod
   if (p(Sha3BlackBox)) {
     require(!p(Sha3TLB).isDefined, "Blackbox SHA3 does not support Dmemmodule")
 
-    val sha3bb = Module(new Sha3BlackBox(0))
+    val sha3bb = Module(new Sha3BlackBox)
     io <> sha3bb.io.io
     sha3bb.io.clock := clock
     sha3bb.io.reset := reset
