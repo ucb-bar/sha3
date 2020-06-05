@@ -23,7 +23,7 @@ object RHOPI {
   )
 }
 object IOTA {
-val round_const = Vec(
+def round_const = Vec(
   Bits("h0000000000000001",64),
   Bits("h0000000000008082",64),
   Bits("h800000000000808a",64),
