@@ -14,7 +14,7 @@ case object Sha3TLB extends Field[Option[TLBConfig]](None)
 class DmemModule(implicit p: Parameters) extends LazyModule {
   lazy val module = new DmemModuleImp(this)
   // FIXME: Unused Diplomacy node needed for conveying the physical address map to the TLB
-  val node = TLClientNode(Seq(TLClientPortParameters(Seq(TLClientParameters("SHA3")))))
+  val node = TLClientNode(Seq(TLMasterPortParameters.v1(Seq(TLMasterParameters.v1("SHA3")))))
 }
 
 class DmemModuleImp(outer: DmemModule)(implicit p: Parameters) extends LazyModuleImp(outer)

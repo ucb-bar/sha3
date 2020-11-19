@@ -170,7 +170,7 @@ class WithSha3Accel extends Config ((site, here, up) => {
   case Sha3BufferSram => false
   case Sha3Keccak => false
   case Sha3BlackBox => false
-  case Sha3TLB => Some(TLBConfig(nEntries = 4, nSectors = 1, nSuperpageEntries = 1))
+  case Sha3TLB => Some(TLBConfig(nSets = 1, nWays = 4, nSectors = 1, nSuperpageEntries = 1))
   case BuildRoCC => up(BuildRoCC) ++ Seq(
     (p: Parameters) => {
       val sha3 = LazyModule.apply(new Sha3Accel(OpcodeSet.custom2)(p))
