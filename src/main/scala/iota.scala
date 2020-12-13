@@ -9,7 +9,7 @@ import scala.util.Random
 import chisel3.iotesters.PeekPokeTester
 
 class IotaModule(val W: Int = 64) extends Module {
-  val io = new Bundle { 
+  val io = new Bundle {
     val state_i = Vec(5*5, Bits(INPUT,W))
     val state_o = Vec(5*5, Bits(OUTPUT,W))
     val round = UInt(INPUT, 5)
@@ -24,7 +24,6 @@ class IotaModule(val W: Int = 64) extends Module {
   }
   //val const = ROUND_CONST.value(io.round)
   val const = IOTA.round_const(io.round)
-  debug(const)
   io.state_o(0) := io.state_i(0) ^ const
 /*
   io.state_o(0) := Cat(io.state_i(0)(63) ^ const(6),
@@ -56,7 +55,7 @@ class IotaModuleTests(c: IotaModule) extends PeekPokeTester(c) {
       expect(c.io.state_o, out_state)
 }
 /*
-object iotaMain { 
+object iotaMain {
   def main(args: Array[String]): Unit = {
     //chiselMainTest(Array[String]("--backend", "c", "--genHarness", "--compile", "--test"),
     chiselMainTest(args,

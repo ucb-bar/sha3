@@ -39,7 +39,7 @@ class CtrlModule(val W: Int, val S: Int)(implicit val p: Parameters) extends Mod
     val dmem_req_cmd      = Bits(OUTPUT, M_SZ)
     val dmem_req_size     = Bits(OUTPUT, log2Ceil(coreDataBytes + 1))
 
-    val dmem_resp_val     = Bool(INPUT) 
+    val dmem_resp_val     = Bool(INPUT)
     val dmem_resp_tag     = Bits(INPUT, 7)
     val dmem_resp_data    = Bits(INPUT, W)
 
@@ -68,7 +68,7 @@ class CtrlModule(val W: Int, val S: Int)(implicit val p: Parameters) extends Mod
   val busy = Reg(init=Bool(false))
 
   val rocc_s = Reg(init=r_idle)
-  //register inputs 
+  //register inputs
   val rocc_req_val_reg = Reg(next=io.rocc_req_val)
   val rocc_funct_reg = Reg(init = Bits(0,2))
   rocc_funct_reg := io.rocc_funct
@@ -92,14 +92,10 @@ class CtrlModule(val W: Int, val S: Int)(implicit val p: Parameters) extends Mod
   val buffer_raddr = Reg(UInt(width = log2Up(round_size_words)))
   val buffer_wen = Wire(Bool());
   buffer_wen := Bool(false) //Defaut value
-  debug(buffer_wen)
   val buffer_waddr = Wire(UInt(width = W)); buffer_waddr := UInt(0)
-  debug(buffer_waddr)
   val buffer_wdata = Wire(UInt(width = W)); buffer_wdata := UInt(0)
-  debug(buffer_wdata)
   val buffer_rdata = Bits(width = W);
-  debug(buffer_rdata)
-  if(buffer_sram){ 
+  if(buffer_sram){
     when(buffer_wen) { buffer_mem.write(buffer_waddr, buffer_wdata) }
     buffer_rdata := buffer_mem(buffer_raddr)
   }
@@ -107,7 +103,7 @@ class CtrlModule(val W: Int, val S: Int)(implicit val p: Parameters) extends Mod
   //This is used to prevent the pad index from advancing if waiting for the sram to read
   //SRAM reads take 1 cycle
   val wait_for_sram = Reg(init = Bool(true))
-  
+
   val buffer_valid = Reg(init = Bool(false))
   val buffer_count = Reg(init = UInt(0,5))
   val read    = Reg(init = UInt(0,32))
@@ -157,11 +153,9 @@ class CtrlModule(val W: Int, val S: Int)(implicit val p: Parameters) extends Mod
   //}else{
     //mindex
   //}
-  
-  debug(words_filled)
+
   //last byte with message in it
   val byte_offset = (msg_len)%UInt(bytes_per_word)
-  debug(byte_offset)
 
   //hasher state
   val s_idle :: s_absorb :: s_finish_abs :: s_hash :: s_write :: Nil = Enum(UInt(), 5)
@@ -221,8 +215,8 @@ class CtrlModule(val W: Int, val S: Int)(implicit val p: Parameters) extends Mod
 
   switch(mem_s){
   is(m_idle){
-  //we can start filling the buffer if we aren't writing and if we got a new message 
-    //or the hashing started 
+  //we can start filling the buffer if we aren't writing and if we got a new message
+    //or the hashing started
       //and there is more to read
       //and the buffer has been absorbed
     val canRead = busy && ( (read < msg_len || (read === msg_len && msg_len === UInt(0)) ) &&
@@ -530,7 +524,7 @@ class CtrlModule(val W: Int, val S: Int)(implicit val p: Parameters) extends Mod
       }
     }
 
-    //next state 
+    //next state
     when(next_buff_val){
     //we have received all responses so the buffer is as full as it will get
       mindex := UInt(0)//reset this for absorb
@@ -664,7 +658,7 @@ class CtrlModule(val W: Int, val S: Int)(implicit val p: Parameters) extends Mod
     }
   }
   is(s_write){
-    //we are writing 
+    //we are writing
     //request
     io.dmem_req_val := windex < UInt(hash_size_words)
     io.dmem_req_addr := hash_addr
