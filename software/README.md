@@ -4,12 +4,11 @@ This is an example set of workloads that uses the SHA3 rocc accelerator.
 
 # Getting Started
 
-When you first clone this repository, you should first update all submodules.
-If you only want to build bare-metal tests, you can skip the linux submodule
-update (which is slow) by only updating spike:
-
-    cd sha3
-    git submodule update --init isa-sim/riscv-isa-sim
+Since SHA3 accelerator uses custom instruction not supported by the vanilla toolchain, 
+these workloads require a modified version of Spike simulator to build, which can be found
+[here](https://github.com/ucb-bar/esp-isa-sim). If you are using Chipyard, make sure to source
+`env.sh` (or if you also have vanilla toolchain installed, `env-esp-tools.sh`). Otherwise, make sure 
+the Spike executable is in your `PATH`.
 
 To run linux-based workloads, you'll also need to update the linux submodule:
 

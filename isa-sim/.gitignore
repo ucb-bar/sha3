@@ -1,4 +1,0 @@
-*.rv
-*.riscv
-spike-sha3/build
-spike-local/

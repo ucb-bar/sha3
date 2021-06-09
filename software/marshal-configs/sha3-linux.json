@@ -8,6 +8,5 @@
     ["benchmarks/linux/sha3-rocc.riscv", "/root/sha3-rocc"]
   ],
   "linux-src" : "linux",
-  "spike" : "../isa-sim/spike-local/bin/spike",
   "spike-args" : "--extension=sha3"
 }
