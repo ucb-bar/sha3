@@ -1,0 +1,1 @@
+source "$BR2_EXTERNAL_RISCV_SHA3_PATH/package/john/Config.in"
