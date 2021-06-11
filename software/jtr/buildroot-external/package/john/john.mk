@@ -31,6 +31,7 @@ define JOHN_INSTALL_TARGET_CMDS
 	$(INSTALL) -m 0755 -D $(@D)/run/john $(TARGET_DIR)/usr/bin
 	$(foreach f,unshadow unafs undrop zip2john gpg2john rar2john base64conv unique,
 		ln -sf john $(TARGET_DIR)/usr/bin/$(f))
+	mkdir -p $(TARGET_DIR)/usr/share/john/rules
 	$(INSTALL) -D -m 0644 -t $(TARGET_DIR)/usr/share/john $(@D)/run/*.chr $(@D)/run/*.conf $(@D)/run/*.lst
 	$(INSTALL) -D -m 0644 -t $(TARGET_DIR)/usr/share/john/rules $(@D)/run/rules/*
 endef

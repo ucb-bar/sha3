@@ -1,6 +1,6 @@
 {
   "name" : "sha3-linux-jtr",
-  "base" : "sha3-linux.json",
+  "base" : "sha3-linux.yaml",
   "workdir" : "..",
   "distro" : {
     "name": "br",

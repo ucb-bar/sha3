@@ -1,6 +1,6 @@
 {
   "name" : "sha3-linux-test",
-  "base" : "sha3-linux.json",
+  "base" : "sha3-linux.yaml",
   "workdir" : "..",
   "command" : "/root/sha3-rocc",
   "testing" : {
