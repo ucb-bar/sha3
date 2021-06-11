@@ -3,10 +3,10 @@ set -e
 
 # Build bare-metal tests
 echo "Building bare-metal tests"
-make -C benchmarks/bare
+make -C tests/bare
 
 echo "Building linux tests"
-make -C benchmarks/linux
+make -C tests/linux
 
 if [ ! -f linux/README ]; then
   echo ""

@@ -1,0 +1,8 @@
+config BR2_PACKAGE_JOHN
+	bool "john"
+	depends on BR2_USE_MMU # fork()
+	select BR2_PACKAGE_OPENSSL
+	help
+	  John the Ripper is a fast password cracker.
+
+	  https://www.openwall.com/john/

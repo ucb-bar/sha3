@@ -4,8 +4,8 @@
   "workdir" : "..",
   "host-init" : "build.sh",
   "files" : [
-    ["benchmarks/linux/sha3-sw.riscv", "/root/sha3-sw"],
-    ["benchmarks/linux/sha3-rocc.riscv", "/root/sha3-rocc"]
+    ["tests/linux/sha3-sw.riscv", "/root/sha3-sw"],
+    ["tests/linux/sha3-rocc.riscv", "/root/sha3-rocc"]
   ],
   "linux-src" : "linux",
   "spike-args" : "--extension=sha3"

@@ -1,0 +1,15 @@
+{
+  "name" : "sha3-linux-jtr",
+  "base" : "sha3-linux.yaml",
+  "workdir" : "..",
+  "distro" : {
+    "name": "br",
+    "opts": {
+      "configs" : [ "jtr/buildroot-config" ],
+      "environment" : {
+        "BR2_EXTERNAL": "${SHA3_LINUX_JTR_PATH}/jtr/buildroot-external"
+      }
+    }
+  },
+  "overlay" : "jtr/overlay"
+}
