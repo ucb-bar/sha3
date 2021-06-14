@@ -4,9 +4,8 @@ This is an example set of workloads that uses the SHA3 rocc accelerator.
 
 # Getting Started
 
-Since SHA3 accelerator uses custom instruction not supported by the vanilla
-toolchain, these workloads require a modified version of Spike simulator to
-build, which can be found [here](https://github.com/ucb-bar/esp-isa-sim). If
+Running these workloads require a modified Spike simulator that supports the SHA3
+custom extension, which can be found [here](https://github.com/ucb-bar/esp-isa-sim). If
 you are using Chipyard, you should install the esp-tools toolchain which comes
 with the appropriate version of Spike.
 
