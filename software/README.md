@@ -58,10 +58,10 @@ To run the unit test run:
 The linux-based workloads can boot in qemu so long as you don't actually access
 the rocc accelerator. To use the custom hardware, you must boot in spike:
 
-    ./marshal --nodisk build marshal-configs/sha3-linux.json
-    ./marshal --nodisk launch --spike marshal-configs/sha3-linux.json
+    ./marshal --no-disk build marshal-configs/sha3-linux.json
+    ./marshal --no-disk launch --spike marshal-configs/sha3-linux.json
 
-The `--nodisk` option tells marshal to build the root filesystem into the
+The `--no-disk` option tells marshal to build the root filesystem into the
 binary as an initial ram filesystem (this is needed because spike does not
 include a disk model). The `--spike` option tells marshal to boot the image in
 spike (the custom spike we provided in this case).
@@ -90,7 +90,7 @@ test output, while the actual program output is much longer.
 
 To use this workload, try running:
 
-    ./marshal --nodisk test --spike marshal-configs/sha3-linux-test.json
+    ./marshal --no-disk test --spike marshal-configs/sha3-linux-test.json
 
 # Key Components of this Workload
 
