@@ -4,11 +4,10 @@ This is an example set of workloads that uses the SHA3 rocc accelerator.
 
 # Getting Started
 
-Since SHA3 accelerator uses custom instruction not supported by the vanilla toolchain, 
-these workloads require a modified version of Spike simulator to build, which can be found
-[here](https://github.com/ucb-bar/esp-isa-sim). If you are using Chipyard, make sure to source
-`env.sh` (or if you also have vanilla toolchain installed, `env-esp-tools.sh`). Otherwise, make sure 
-the Spike executable is in your `PATH`.
+Running these workloads require a modified Spike simulator that supports the SHA3
+custom extension, which can be found [here](https://github.com/ucb-bar/esp-isa-sim). If
+you are using Chipyard, you should install the esp-tools toolchain which comes
+with the appropriate version of Spike.
 
 To run linux-based workloads, you'll also need to update the linux submodule:
 
@@ -16,13 +15,14 @@ To run linux-based workloads, you'll also need to update the linux submodule:
     git submodule update --init software/linux
 
 These workloads all use FireMarshal to build and test. All the examples in this
-README assume that marshal is on your PATH, if not, replace all calls to
-marshal with the path to the marshal command (e.g.
-`../../../software/firemarshal/marshal` if you're in chipyard).
+README assume that marshal is on your PATH (the default if you've set up
+chipyard).
 
 The first time you build a workload using FireMarshal, the `build.sh` script
 will be run automatically. This script compiles all of our dependencies (e.g.
-Linux and our custom software simulator, spike).
+Linux and Buildroot). The first time building will take a long time since some
+of these dependencies take a long time to build (especially Buildroot).
+Subsequent builds will go faster since FireMarshal caches dependencies.
 
 # Workloads
 
@@ -30,89 +30,76 @@ All workload configuration files are in `marshal-configs`.
 
 ## Bare-Metal
 
-There are two different bare-metal workloads that are packaged in this repository. `sha3-bare-rocc` uses the SHA3
-accelerator to run a SHA3 computation. The `sha3-bare-sw` instead computes the SHA3 hash using software only.
+There are two different bare-metal workloads that are packaged in this
+repository. `sha3-bare-rocc` uses the SHA3 accelerator to run a SHA3
+computation. The `sha3-bare-sw` instead computes the
+SHA3 hash using software only.
 
-    sha3-bare-rocc.json
-    sha3-bare-sw.json
+    sha3-bare-rocc.yaml
+    sha3-bare-sw.yaml
 
 To build either binary run:
 
-    ./marshal build marshal-configs/sha3-bare-rocc.json
-    ./marshal build marshal-configs/sha3-bare-sw.json
+    marshal build marshal-configs/sha3-bare-rocc.yaml
+    marshal build marshal-configs/sha3-bare-sw.yaml
 
 To run the test interactively run:
 
-    ./marshal launch --spike marshal-configs/sha3-bare-rocc.json
-    ./marshal launch --spike marshal-configs/sha3-bare-sw.json
+    marshal launch --spike marshal-configs/sha3-bare-rocc.yaml
+    marshal launch --spike marshal-configs/sha3-bare-sw.yaml
 
 To run the unit test run:
 
-    ./marshal test --spike marshal-configs/sha3-bare-rocc.json
-    ./marshal test --spike marshal-configs/sha3-bare-sw.json
+    marshal test --spike marshal-configs/sha3-bare-rocc.yaml
+    marshal test --spike marshal-configs/sha3-bare-sw.yaml
 
 ## Linux
 
-***sha3-linux*.json***
+***sha3-linux*.yaml***
 
 The linux-based workloads can boot in qemu so long as you don't actually access
 the rocc accelerator. To use the custom hardware, you must boot in spike:
 
-    ./marshal --nodisk build marshal-configs/sha3-linux.json
-    ./marshal --nodisk launch --spike marshal-configs/sha3-linux.json
+    marshal --no-disk build marshal-configs/sha3-linux.yaml
+    marshal --no-disk launch --spike marshal-configs/sha3-linux.yaml
 
-The `--nodisk` option tells marshal to build the root filesystem into the
+The `--no-disk` option tells marshal to build the root filesystem into the
 binary as an initial ram filesystem (this is needed because spike does not
-include a disk model). The `--spike` option tells marshal to boot the image in
-spike (the custom spike we provided in this case).
+include a disk model). The `--spike` option tells FireMarshal to boot the image
+in spike so we can use the sha3 functional model (FireMarshal uses QEMU by
+default).
 
 ### Interactive Linux
 
-***sha3-linux.json***
+***sha3-linux.yaml***
 
 This workload boots buildroot and uses the SHA3 accelerator as a user-space
 program. The basic workload boots into an interactive session. You can look at
-`/root/linux` in the target for binaries to execute. `sha3-sw` acts as a
-baseline and computes the hash in software only. `sha3-rocc` uses the rocc
-accelerator to compute the hash.
+`/root` in the target for binaries to execute. `sha3-sw` acts as a baseline and
+computes the hash in software only. `sha3-rocc` uses the rocc accelerator to
+compute the hash.
 
 ### Automated Linux Test
 
-***sha3-linux-test.json***
+***sha3-linux-test.yaml***
 
-This workload inherits from sha3-linux.json and adds a 'command' field that
-tells marshal to run a command automatically when the workload runs. It also
-adds a 'testing' field that provides a reference output for Marshal to compare
-against when running `./marshal test marshal-configs/sha3-linux-test.json`. Note that
-in Marshal, the reference output needs to match some subset of the actual
+This workload inherits from sha3-linux.yaml and adds a 'command' field that
+tells FireMarshal to run a command automatically when the workload runs. It also
+adds a 'testing' field that provides a reference output for FireMarshal to compare
+against when running `marshal test marshal-configs/sha3-linux-test.yaml`. Note that
+in FireMarshal, the reference output needs to match some subset of the actual
 output (notice that `test-reference/linux/sha3-linux-test/uartlog` only has the
 test output, while the actual program output is much longer.
 
 To use this workload, try running:
 
-    ./marshal --nodisk test --spike marshal-configs/sha3-linux-test.json
+    marshal --no-disk test --spike marshal-configs/sha3-linux-test.yaml
 
 # Key Components of this Workload
 
-## riscv-linux
+## linux
 
-The default Linux kernel does not support rocc instructions. Instead, we must
-use a fork. You can check the git log to see which changes we made.
-
-The first two commits fix known incompatibilities between Linux and FireSim
-(mostly relating to device tree differences). The final commit enables rocc
-instructions by setting a CSR at thread creation time.
-
-## riscv-isa-sim and spike-sha3
-
-This is the standard riscv isa simulator (also known as 'spike'). We have
-modified it to contain a golden model of our SHA3 accelerator. In the case of
-rocc accelerators, we can build the golden model out-of-tree (in the spike-sha3
-directory) and simply have it installed along-side the standard spike. See
-`build.sh` for how this is done.
-
-We install our custom spike to `spike-local`. Marshal is able to use this local
-copy instead of the system-provided spike.
+A fork of Linux with some minor changes to support the sha3 accelerator.
 
 ## marshal-configs
 
@@ -123,20 +110,13 @@ This directory contains our FireMarshal configurations for each workload.
 This directory contains reference outputs for each of our automated test
 workloads.
 
-## linux-benchmarks
+## tests 
 
-Contains sources for our linux-based benchmarks. This directory is coppied into
-the root directory of our Linux workloads. These are cross-compiled by the
-`build.sh` script (run by FireMarshal when building the workload).
-
-## bare-benchmarks
-
-Contains sources for the bare-metal benchmarks and unit tests. These are
-cross-compiled by the `build.sh` script (run by FireMarshal when building the
-workload). These benchmarks contain all of the code necessary to boot and run
-on a bare-metal system (e.g. the c runtime and a basic implementation of common
-system functions).
+Contains simple unit tests for the accelerator. These will be incorproated into
+various test workloads. They are cross-compiled by `build.sh` (called
+automatically by FireMarshal when building workloads).
 
 ## jtr
 
-Contains a fork of John the Ripper that targets the SHA3 accelerator.
+Contains a fork of John the Ripper that targets the SHA3 accelerator. This
+serves as our main end-to-end benchmark.
