@@ -6,7 +6,7 @@ import Chisel._
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
-import chisel3.iotesters.PeekPokeTester
+import chiseltest.iotesters.PeekPokeTester
 
 class IotaModule(val W: Int = 64) extends Module {
   val io = new Bundle {
