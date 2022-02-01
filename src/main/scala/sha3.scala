@@ -112,6 +112,7 @@ class Sha3AccelImp(outer: Sha3Accel)(implicit p: Parameters) extends LazyRoCCMod
     ctrl.io.rocc_rd        <> io.cmd.bits.inst.rd
     io.busy := ctrl.io.busy
 
+    val status = RegEnable(io.cmd.bits.status, io.cmd.fire())
     val dmem_data = Wire(Bits())
     def dmem_ctrl(req: DecoupledIO[HellaCacheReq]) {
       req.valid := ctrl.io.dmem_req_val
@@ -122,6 +123,8 @@ class Sha3AccelImp(outer: Sha3Accel)(implicit p: Parameters) extends LazyRoCCMod
       req.bits.size := ctrl.io.dmem_req_size
       req.bits.data := dmem_data
       req.bits.signed := Bool(false)
+      req.bits.dprv := status.dprv
+      req.bits.dv := status.dv
       req.bits.phys := Bool(false)
     }
 
@@ -132,8 +135,7 @@ class Sha3AccelImp(outer: Sha3Accel)(implicit p: Parameters) extends LazyRoCCMod
         io.mem.req <> dmem.io.mem
         io.ptw.head <> dmem.io.ptw
 
-        dmem.io.status.valid := io.cmd.fire()
-        dmem.io.status.bits := io.cmd.bits.status
+        dmem.io.status := status
         dmem.io.sfence := ctrl.io.sfence
       }
       case None => dmem_ctrl(io.mem.req)

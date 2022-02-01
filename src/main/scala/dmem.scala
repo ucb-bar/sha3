@@ -24,7 +24,7 @@ class DmemModuleImp(outer: DmemModule)(implicit p: Parameters) extends LazyModul
     val req = Decoupled(new HellaCacheReq).flip
     val mem = Decoupled(new HellaCacheReq)
     val ptw = new TLBPTWIO
-    val status = Valid(new MStatus).flip
+    val status = new MStatus().asInput
     val sfence = Bool(INPUT)
   })
 
@@ -36,21 +36,18 @@ class DmemModuleImp(outer: DmemModule)(implicit p: Parameters) extends LazyModul
   tl.d.ready := Bool(true)
   tl.e.valid := Bool(false)
 
-  val status = Reg(new MStatus)
-  when (io.status.valid) {
-    status := io.status.bits
-  }
-
   val tlb = Module(new TLB(false, log2Ceil(coreDataBytes), p(Sha3TLB).get)(edge, p))
   tlb.io.req.valid := io.req.valid
   tlb.io.req.bits.vaddr := io.req.bits.addr
   tlb.io.req.bits.size := io.req.bits.size
   tlb.io.req.bits.cmd := io.req.bits.cmd
+  tlb.io.req.bits.prv := io.req.bits.dprv
+  tlb.io.req.bits.v := io.req.bits.dv
   tlb.io.req.bits.passthrough := Bool(false)
   val tlb_ready = tlb.io.req.ready && !tlb.io.resp.miss
 
   io.ptw <> tlb.io.ptw
-  tlb.io.ptw.status := status
+  tlb.io.ptw.status := io.status
   tlb.io.sfence.valid := io.sfence
   tlb.io.sfence.bits.rs1 := Bool(false)
   tlb.io.sfence.bits.rs2 := Bool(false)
@@ -70,7 +67,7 @@ class DmemModuleImp(outer: DmemModule)(implicit p: Parameters) extends LazyModul
    * spurious PMP exceptions (io.resp.ae.ld) even when the actual
    * privilege level is M-mode.
    */
-  io.mem.bits.phys := (status.dprv =/= UInt(PRV.M))
+  io.mem.bits.phys := (io.req.bits.dprv =/= UInt(PRV.M))
 
   // FIXME: Check TLB exceptions
 }
