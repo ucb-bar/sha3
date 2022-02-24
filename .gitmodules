@@ -4,3 +4,6 @@
 [submodule "software/linux"]
 	path = software/linux
 	url = https://github.com/firesim/linux.git
+[submodule "software/esp-isa-sim"]
+	path = software/esp-isa-sim
+	url = https://github.com/ucb-bar/esp-isa-sim.git
