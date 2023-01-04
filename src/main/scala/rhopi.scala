@@ -3,7 +3,7 @@
 package sha3
 
 import Chisel._
-import chiseltest.iotesters.PeekPokeTester
+//import chiseltest.iotesters.PeekPokeTester
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
