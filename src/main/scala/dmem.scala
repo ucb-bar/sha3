@@ -3,7 +3,7 @@
 package sha3
 
 import Chisel._
-import freechips.rocketchip.config.{Field, Parameters}
+import org.chipsalliance.cde.config.{Field, Parameters}
 import freechips.rocketchip.tile.HasCoreParameters
 import freechips.rocketchip.rocket.{HellaCacheReq, TLB, TLBPTWIO, TLBConfig, MStatus, PRV}
 import freechips.rocketchip.diplomacy._

@@ -10,7 +10,7 @@ import Chisel.ImplicitConversions._
 import scala.collection.mutable.HashMap
 import freechips.rocketchip.tile.HasCoreParameters
 import freechips.rocketchip.rocket.constants.MemoryOpConstants
-import freechips.rocketchip.config._
+import org.chipsalliance.cde.config._
 
 class CtrlModule(val W: Int, val S: Int)(implicit val p: Parameters) extends Module
   with HasCoreParameters
