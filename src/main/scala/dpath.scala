@@ -6,7 +6,7 @@ import Chisel._
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
-import freechips.rocketchip.config.Parameters
+import org.chipsalliance.cde.config.Parameters
 
 class DpathModule(val W: Int, val S: Int)(implicit p: Parameters) extends Module {
   //constants
