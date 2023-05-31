@@ -54,7 +54,7 @@ abstract class SimpleRoCC()(implicit p: Parameters) extends RoCC()(p)
  */
 
 class WrapBundle(nPTWPorts: Int)(implicit p: Parameters) extends Bundle {
-  val io = new RoCCIO(nPTWPorts)
+  val io = new RoCCIO(nPTWPorts, 0)
   val clock = Clock(INPUT)
   val reset = Input(UInt(1.W))
 }
