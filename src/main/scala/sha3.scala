@@ -2,8 +2,8 @@
 //authors: Colin Schmidt, Adam Izraelevitz
 package sha3
 
-import Chisel._
-import chisel3.util.{HasBlackBoxResource}
+import chisel3._
+import chisel3.util._
 import freechips.rocketchip.tile._
 import org.chipsalliance.cde.config._
 import freechips.rocketchip.diplomacy._
@@ -55,7 +55,7 @@ abstract class SimpleRoCC()(implicit p: Parameters) extends RoCC()(p)
 
 class WrapBundle(nPTWPorts: Int)(implicit p: Parameters) extends Bundle {
   val io = new RoCCIO(nPTWPorts, 0)
-  val clock = Clock(INPUT)
+  val clock = Input(Clock())
   val reset = Input(UInt(1.W))
 }
 
@@ -94,7 +94,7 @@ class Sha3AccelImp(outer: Sha3Accel)(implicit p: Parameters) extends LazyRoCCMod
   //RoCC Interface defined in testMems.scala
   //cmd
   //resp
-  io.resp.valid := Bool(false) //Sha3 never returns values with the resp
+  io.resp.valid := false.B //Sha3 never returns values with the resp
   //mem
   //busy
   if (p(Sha3BlackBox)) {
@@ -126,15 +126,16 @@ class Sha3AccelImp(outer: Sha3Accel)(implicit p: Parameters) extends LazyRoCCMod
       req.bits.cmd := ctrl.io.dmem_req_cmd
       req.bits.size := ctrl.io.dmem_req_size
       req.bits.data := dmem_data
-      req.bits.signed := Bool(false)
+      req.bits.signed := false.B
       req.bits.dprv := status.dprv
       req.bits.dv := status.dv
-      req.bits.phys := Bool(false)
+      req.bits.phys := false.B
     }
 
     outer.dmemOpt match {
       case Some(m) => {
         val dmem = m.module
+        dmem.io := DontCare
         dmem_ctrl(dmem.io.req)
         io.mem.req <> dmem.io.mem
         io.ptw.head <> dmem.io.ptw
