@@ -78,7 +78,7 @@ class Sha3Accel(opcodes: OpcodeSet)(implicit p: Parameters) extends LazyRoCC(
 class Sha3AccelImp(outer: Sha3Accel)(implicit p: Parameters) extends LazyRoCCModuleImp(outer) {
   // Suppress DCE to ensure that the module ports are kept consistent
   // between the regular generated Verilog and Sha3BlackBox version
-  chisel3.dontTouch(io)
+  //chisel3.dontTouch(io)
 
   //parameters
   val W = p(Sha3WidthP)
@@ -103,7 +103,7 @@ class Sha3AccelImp(outer: Sha3Accel)(implicit p: Parameters) extends LazyRoCCMod
     val sha3bb = Module(new Sha3BlackBox)
     io <> sha3bb.io.io
     sha3bb.io.clock := clock
-    sha3bb.io.reset := reset
+    sha3bb.io.reset := reset.asBool
   } else {
 
     val ctrl = Module(new CtrlModule(W,S)(p))
